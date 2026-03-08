@@ -53,6 +53,11 @@ Prepare these before submitting:
 - project homepage URL
 - short and long description copy
 
+Reference files:
+
+- listing copy: `docs/chrome-web-store-listing.md`
+- release pipeline: `docs/chrome-web-store-pipeline.md`
+
 ## Suggested listing copy
 
 ### Short description

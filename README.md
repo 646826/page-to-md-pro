@@ -64,6 +64,8 @@ docs/                  QA, privacy policy, support docs, release checklist
 - Privacy policy: [docs/privacy-policy.md](docs/privacy-policy.md)
 - Support: [docs/support.md](docs/support.md)
 - Release checklist: [docs/release-checklist.md](docs/release-checklist.md)
+- Chrome Web Store listing copy: [docs/chrome-web-store-listing.md](docs/chrome-web-store-listing.md)
+- Chrome Web Store pipeline: [docs/chrome-web-store-pipeline.md](docs/chrome-web-store-pipeline.md)
 
 ## Develop and test
 

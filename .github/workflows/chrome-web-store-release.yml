@@ -1,0 +1,93 @@
+name: Chrome Web Store Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      publish_type:
+        description: "Upload only, submit for immediate publish, or stage after approval"
+        required: true
+        type: choice
+        default: UPLOAD_ONLY
+        options:
+          - UPLOAD_ONLY
+          - DEFAULT_PUBLISH
+          - STAGED_PUBLISH
+      skip_review:
+        description: "Attempt to skip review when the item is eligible"
+        required: true
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    environment: chrome-web-store
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browser and OS dependencies
+        run: npx playwright install --with-deps chromium
+
+      - name: Run fixture tests
+        run: npm test
+
+      - name: Build Chrome Web Store package
+        run: npm run build:zip
+
+      - id: auth_wif
+        name: Authenticate with Google Cloud via Workload Identity Federation
+        if: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && secrets.GCP_SERVICE_ACCOUNT != '' }}
+        uses: google-github-actions/auth@v3
+        with:
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+
+      - id: auth_key
+        name: Authenticate with Google Cloud via Service Account Key
+        if: ${{ !(secrets.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && secrets.GCP_SERVICE_ACCOUNT != '') }}
+        uses: google-github-actions/auth@v3
+        with:
+          credentials_json: ${{ secrets.GOOGLE_CREDENTIALS }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+          token_format: access_token
+          access_token_scopes: https://www.googleapis.com/auth/chromewebstore
+
+      - id: resolve_token
+        name: Resolve access token
+        shell: bash
+        run: |
+          token="${{ steps.auth_wif.outputs.access_token }}"
+          if [[ -z "${token}" ]]; then
+            token="${{ steps.auth_key.outputs.access_token }}"
+          fi
+          if [[ -z "${token}" ]]; then
+            echo "Failed to obtain a Chrome Web Store API access token." >&2
+            exit 1
+          fi
+          echo "access_token=${token}" >> "${GITHUB_OUTPUT}"
+
+      - name: Upload and optionally submit to the Chrome Web Store
+        env:
+          CWS_ACCESS_TOKEN: ${{ steps.resolve_token.outputs.access_token }}
+          CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
+          CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
+          CWS_PUBLISH_TYPE: ${{ inputs.publish_type }}
+          CWS_SKIP_REVIEW: ${{ inputs.skip_review }}
+        run: bash scripts/cws-release.sh page-to-md-pro.zip

@@ -4,6 +4,7 @@ node_modules/
 *.zip
 *.crx
 *.pem
+gha-creds-*.json
 .idea/
 .vscode/
 *.swp
