@@ -36,12 +36,34 @@ process.stdout.write(String(current));
 ' "$1"
 }
 
+api_call() {
+  local method="$1"
+  local url="$2"
+  shift 2
+
+  local response_file http_code
+  response_file="$(mktemp)"
+  http_code="$(curl --silent --show-error \
+    -o "${response_file}" \
+    -w '%{http_code}' \
+    -H "${auth_header}" \
+    -X "${method}" \
+    "$@" \
+    "${url}" || true)"
+
+  if [[ ! "${http_code}" =~ ^2 ]]; then
+    echo "Chrome Web Store API request failed (${method} ${url}) with HTTP ${http_code}." >&2
+    cat "${response_file}" >&2 || true
+    rm -f "${response_file}"
+    return 1
+  fi
+
+  cat "${response_file}"
+  rm -f "${response_file}"
+}
+
 echo "Uploading ${PACKAGE_FILE} to ${item_name}"
-upload_response="$(curl --fail-with-body --silent --show-error \
-  -H "${auth_header}" \
-  -X POST \
-  -T "${PACKAGE_FILE}" \
-  "${upload_url}")"
+upload_response="$(api_call POST "${upload_url}" -T "${PACKAGE_FILE}")"
 printf '%s\n' "${upload_response}"
 
 upload_state="$(printf '%s' "${upload_response}" | json_read 'uploadState' || true)"
@@ -50,10 +72,7 @@ if [[ "${upload_state}" == "IN_PROGRESS" ]]; then
   echo "Upload is processing asynchronously. Polling status..."
   for attempt in $(seq 1 30); do
     sleep 2
-    status_response="$(curl --fail-with-body --silent --show-error \
-      -H "${auth_header}" \
-      -X GET \
-      "${status_url}")"
+    status_response="$(api_call GET "${status_url}")"
     printf '%s\n' "${status_response}"
 
     upload_state="$(printf '%s' "${status_response}" | json_read 'lastAsyncUploadState' || true)"
@@ -86,12 +105,9 @@ process.stdout.write(JSON.stringify({ publishType, skipReview }));
 ' "${PUBLISH_TYPE}" "${SKIP_REVIEW}")"
 
 echo "Submitting item with publishType=${PUBLISH_TYPE} skipReview=${SKIP_REVIEW}"
-publish_response="$(curl --fail-with-body --silent --show-error \
-  -H "${auth_header}" \
+publish_response="$(api_call POST "${publish_url}" \
   -H "Content-Type: application/json" \
-  -X POST \
-  -d "${request_body}" \
-  "${publish_url}")"
+  -d "${request_body}")"
 printf '%s\n' "${publish_response}"
 
 publish_state="$(printf '%s' "${publish_response}" | json_read 'state' || true)"
