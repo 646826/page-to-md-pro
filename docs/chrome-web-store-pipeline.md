@@ -98,6 +98,7 @@ It does the following:
 - Keep the first item creation manual in the dashboard.
 - Prefer Workload Identity Federation over long-lived service account keys.
 - Use `STAGED_PUBLISH` for production releases unless you have a strong reason to auto-publish.
+- Consider opting in to verified uploads once the release process is stable, so future uploads must be signed with your own trusted key.
 - Keep listing, privacy, and distribution changes deliberate. The API publishes using the existing visibility settings.
 - For parallel beta testing, use a separate beta item rather than reusing the production item.
 - If you discover a bug during review, cancel the submission and upload a corrected package.
