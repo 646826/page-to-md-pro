@@ -15,6 +15,8 @@ That is the safer model for extensions because every submitted package goes thro
 
 The upload endpoint documented by the Chrome Web Store API uploads a package to an existing item. In practice, this means you should create the first store item manually in the Developer Dashboard, fill out the Store listing and Privacy tabs, and only then automate future uploads and submissions.
 
+There is an older V1 API that includes an insert method, but V1 is deprecated. For a new release pipeline, it is safer to create the first item manually and use the current workflow only for updates.
+
 ## First-time setup
 
 ### 1. Create the item manually
