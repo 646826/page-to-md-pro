@@ -50,6 +50,7 @@ Prepare these before submitting:
 - optional marquee promo tile: `assets/store/marquee-promo-tile-1400x560.png`
 - privacy policy URL
 - support URL
+- project homepage URL
 - short and long description copy
 
 ## Suggested listing copy
@@ -82,6 +83,9 @@ Recommended answers for the Chrome Web Store privacy questionnaire:
 
 ## Post-submit checks
 
+- Verify the project homepage is live at `https://646826.github.io/page-to-md-pro/`.
+- Verify the privacy policy is live at `https://646826.github.io/page-to-md-pro/privacy.html`.
+- Verify the support page is live at `https://646826.github.io/page-to-md-pro/support.html`.
 - Verify the public store listing links to the correct GitHub repository.
 - Verify the privacy policy and support URLs are reachable without authentication.
 - Install the published item from the store and repeat the smoke checks.

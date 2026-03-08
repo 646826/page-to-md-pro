@@ -3,7 +3,8 @@
 If you run into a bug, extraction issue, or store-listing question, use one of the following paths:
 
 - Bug reports and feature requests: <https://github.com/646826/page-to-md-pro/issues>
-- Project homepage: <https://github.com/646826/page-to-md-pro>
+- Project homepage: <https://646826.github.io/page-to-md-pro/>
+- Source repository: <https://github.com/646826/page-to-md-pro>
 
 When reporting a problem, include:
 

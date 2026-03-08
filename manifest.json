@@ -24,7 +24,7 @@
     "48": "assets/icon48.png",
     "128": "assets/icon128.png"
   },
-  "homepage_url": "https://github.com/646826/page-to-md-pro",
+  "homepage_url": "https://646826.github.io/page-to-md-pro/",
   "commands": {
     "download-page-markdown": {
       "suggested_key": {

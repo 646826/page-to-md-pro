@@ -10,7 +10,13 @@ zip -r "$OUT" \
   manifest.json \
   src/ \
   lib/ \
-  assets/ \
+  -x "*.DS_Store"
+
+zip "$OUT" \
+  assets/icon16.png \
+  assets/icon32.png \
+  assets/icon48.png \
+  assets/icon128.png \
   -x "*.DS_Store"
 
 echo "Created $OUT ($(du -h "$OUT" | cut -f1))"

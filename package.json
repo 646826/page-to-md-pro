@@ -5,7 +5,7 @@
   "description": "One-click Chrome extension that exports the current page or selection as Markdown.",
   "author": "646826",
   "license": "MIT",
-  "homepage": "https://github.com/646826/page-to-md-pro",
+  "homepage": "https://646826.github.io/page-to-md-pro/",
   "repository": {
     "type": "git",
     "url": "https://github.com/646826/page-to-md-pro.git"
