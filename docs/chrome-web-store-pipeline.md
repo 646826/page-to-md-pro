@@ -62,7 +62,6 @@ If you want the fastest initial setup, you can use a service account key secret 
 Configure these GitHub environment secrets under the `chrome-web-store` environment:
 
 - `GOOGLE_CREDENTIALS`
-- `GCP_SERVICE_ACCOUNT`
 - `CWS_PUBLISHER_ID`
 - `CWS_EXTENSION_ID`
 
