@@ -87,6 +87,7 @@ jobs:
             echo "Failed to obtain a Chrome Web Store API access token." >&2
             exit 1
           fi
+          echo "::add-mask::${token}"
           echo "access_token=${token}" >> "${GITHUB_OUTPUT}"
 
       - name: Upload and optionally submit to the Chrome Web Store
