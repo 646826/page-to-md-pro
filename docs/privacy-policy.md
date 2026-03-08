@@ -35,3 +35,7 @@ Page to Markdown Pro processes page content locally in your browser when you exp
 ## Contact
 
 For privacy questions or requests, use the support information in [support.md](support.md).
+
+## Chrome Web Store user data policy
+
+The use of information collected from web pages through this extension is limited to providing the user-facing export feature described in the Chrome Web Store listing and the extension UI. The extension does not use this information for advertising, profiling, or sale to third parties.
