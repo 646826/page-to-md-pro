@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Store Preview | Page to Markdown Pro</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f3efe6;
+        --ink: #1c1917;
+        --muted: #57534e;
+        --panel: rgba(255, 255, 255, 0.84);
+        --border: rgba(28, 25, 23, 0.10);
+        --accent: #0f766e;
+        --accent-soft: rgba(15, 118, 110, 0.14);
+        --paper: #fffdf8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        width: 1280px;
+        height: 800px;
+        overflow: hidden;
+        font-family: Georgia, "Times New Roman", serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 12% 14%, rgba(15, 118, 110, 0.18), transparent 24%),
+          radial-gradient(circle at 88% 12%, rgba(194, 65, 12, 0.16), transparent 20%),
+          linear-gradient(180deg, #faf8f2 0%, var(--bg) 100%);
+      }
+
+      .frame {
+        padding: 42px 44px;
+      }
+
+      .eyebrow {
+        display: inline-block;
+        margin-bottom: 16px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.66);
+        border: 1px solid var(--border);
+        color: var(--accent);
+        font: 700 13px/1 "Avenir Next", Avenir, "Segoe UI", sans-serif;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      h1,
+      h2,
+      .ui {
+        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+      }
+
+      h1 {
+        max-width: 730px;
+        margin: 0 0 14px;
+        font-size: 58px;
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+      }
+
+      .sub {
+        max-width: 640px;
+        margin: 0 0 28px;
+        font-size: 22px;
+        color: var(--muted);
+      }
+
+      .layout {
+        display: grid;
+        grid-template-columns: 1.05fr 0.95fr;
+        gap: 22px;
+      }
+
+      .card {
+        padding: 22px;
+        border-radius: 24px;
+        background: var(--panel);
+        border: 1px solid var(--border);
+        box-shadow: 0 18px 48px rgba(28, 25, 23, 0.08);
+        backdrop-filter: blur(10px);
+      }
+
+      .browser {
+        overflow: hidden;
+      }
+
+      .browser-top {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 14px;
+        color: var(--muted);
+        font: 600 14px/1 "Avenir Next", Avenir, "Segoe UI", sans-serif;
+      }
+
+      .dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #d6d3d1;
+      }
+
+      .url {
+        margin-left: 8px;
+        padding: 10px 14px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.92);
+        border: 1px solid var(--border);
+        flex: 1;
+      }
+
+      .article {
+        padding: 18px 20px;
+        border-radius: 18px;
+        background: #ffffff;
+      }
+
+      .article h2 {
+        margin: 0 0 10px;
+        font-size: 34px;
+        letter-spacing: -0.03em;
+      }
+
+      .article p,
+      .article li {
+        font-size: 18px;
+      }
+
+      .note {
+        margin: 18px 0;
+        padding: 14px 16px;
+        border-left: 5px solid var(--accent);
+        background: var(--accent-soft);
+        border-radius: 14px;
+      }
+
+      .code {
+        margin: 18px 0;
+        padding: 16px;
+        border-radius: 16px;
+        background: #1f2937;
+        color: #f8fafc;
+        font: 15px/1.5 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      .markdown {
+        background: linear-gradient(180deg, #fffefb 0%, var(--paper) 100%);
+      }
+
+      .markdown h3 {
+        margin: 0 0 16px;
+        color: var(--accent);
+        font: 800 14px/1 "Avenir Next", Avenir, "Segoe UI", sans-serif;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      pre {
+        margin: 0;
+        white-space: pre-wrap;
+        font: 16px/1.55 "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      .footer {
+        display: flex;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .pill {
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid var(--border);
+        background: rgba(255, 255, 255, 0.75);
+        font: 700 13px/1 "Avenir Next", Avenir, "Segoe UI", sans-serif;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="frame">
+      <div class="eyebrow">Chrome Extension</div>
+      <h1>One click from a live page to clean Markdown.</h1>
+      <p class="sub">Built for articles, docs, code blocks, tables, callouts, and math without asking for broad host permissions.</p>
+
+      <section class="layout">
+        <article class="card browser">
+          <div class="browser-top">
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+            <div class="url">example.dev/docs/quickstart</div>
+          </div>
+
+          <div class="article">
+            <h2>Quickstart Guide</h2>
+            <p>Export the useful content, not the page chrome. The extension chooses a strong content root and preserves code, links, images, and notes.</p>
+            <div class="note">
+              <strong>Note:</strong> Complex tables stay readable and lazy images keep their usable URLs.
+            </div>
+            <div class="code">npm test
+npm run build:zip</div>
+            <ul>
+              <li>Selection export</li>
+              <li>Front matter metadata</li>
+              <li>Markdown-first table handling</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="card markdown">
+          <h3>Generated Markdown</h3>
+          <pre>---
+title: "Quickstart Guide"
+site: "Example Docs"
+extractor: "semantic"
+---
+
+# Quickstart Guide
+
+Export the useful content, not the page chrome.
+
+> [!NOTE]
+> Complex tables stay readable and lazy images
+> keep their usable URLs.
+
+```bash
+npm test
+npm run build:zip
+```
+
+- Selection export
+- Front matter metadata
+- Markdown-first table handling</pre>
+          <div class="footer">
+            <div class="pill">No broad host permissions</div>
+            <div class="pill">Local processing</div>
+            <div class="pill">Markdown download</div>
+          </div>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page to Markdown Pro</title>
+    <meta name="description" content="One-click Chrome extension that exports the current page or selected content as clean Markdown.">
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #f4f1ea;
+        --panel: rgba(255, 255, 255, 0.78);
+        --border: rgba(41, 37, 36, 0.12);
+        --text: #1c1917;
+        --muted: #57534e;
+        --accent: #0f766e;
+        --accent-strong: #115e59;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font: 16px/1.6 Georgia, "Times New Roman", serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 34%),
+          radial-gradient(circle at top right, rgba(180, 83, 9, 0.12), transparent 28%),
+          linear-gradient(180deg, #f8f5ef 0%, var(--bg) 100%);
+      }
+
+      .wrap {
+        max-width: 960px;
+        margin: 0 auto;
+        padding: 48px 20px 72px;
+      }
+
+      .hero {
+        margin-bottom: 24px;
+      }
+
+      h1,
+      h2 {
+        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      h1 {
+        margin: 0 0 12px;
+        font-size: clamp(2.4rem, 5vw, 4.4rem);
+      }
+
+      h2 {
+        margin: 0 0 14px;
+        font-size: 1.3rem;
+      }
+
+      p {
+        margin: 0 0 14px;
+        max-width: 68ch;
+      }
+
+      .lede {
+        font-size: 1.1rem;
+        color: var(--muted);
+      }
+
+      .grid {
+        display: grid;
+        gap: 18px;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        margin: 32px 0;
+      }
+
+      .card {
+        padding: 22px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--panel);
+        backdrop-filter: blur(10px);
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 18px;
+      }
+
+      a {
+        color: var(--accent-strong);
+      }
+
+      .actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 18px;
+      }
+
+      .button {
+        display: inline-block;
+        padding: 12px 16px;
+        border-radius: 999px;
+        text-decoration: none;
+        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+        font-weight: 700;
+        border: 1px solid var(--accent);
+      }
+
+      .button.primary {
+        background: var(--accent);
+        color: #ffffff;
+      }
+
+      .button.secondary {
+        color: var(--accent-strong);
+        background: rgba(255, 255, 255, 0.55);
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <header class="hero">
+        <h1>Page to Markdown Pro</h1>
+        <p class="lede">Export the current page or selected content as a clean Markdown file in one click.</p>
+        <p>Built for articles, docs, code-heavy pages, tables, callouts, and math without requiring broad host permissions.</p>
+        <div class="actions">
+          <a class="button primary" href="https://github.com/646826/page-to-md-pro">View on GitHub</a>
+          <a class="button secondary" href="support.html">Support</a>
+          <a class="button secondary" href="privacy.html">Privacy Policy</a>
+        </div>
+      </header>
+
+      <section class="grid" aria-label="Key details">
+        <article class="card">
+          <h2>How it works</h2>
+          <ul>
+            <li>Click the extension action, use a shortcut, or use the context menu.</li>
+            <li>The extension processes the active page locally in your browser.</li>
+            <li>A Markdown file is generated and saved to your device.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>What it focuses on</h2>
+          <ul>
+            <li>Readable Markdown output with front matter.</li>
+            <li>Code blocks, callouts, tables, and math preservation.</li>
+            <li>Selection export and large-file download fallback.</li>
+          </ul>
+        </article>
+
+        <article class="card">
+          <h2>Project links</h2>
+          <ul>
+            <li><a href="https://github.com/646826/page-to-md-pro">Repository</a></li>
+            <li><a href="https://github.com/646826/page-to-md-pro/issues">Issue tracker</a></li>
+            <li><a href="privacy.html">Privacy policy</a></li>
+            <li><a href="support.html">Support</a></li>
+          </ul>
+        </article>
+      </section>
+    </main>
+  </body>
+</html>

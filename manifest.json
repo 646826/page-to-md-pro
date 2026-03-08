@@ -1,0 +1,44 @@
+{
+  "manifest_version": 3,
+  "name": "Page to Markdown Pro",
+  "version": "0.1.0",
+  "description": "One-click Markdown export for the current page or selection, tuned for articles, docs, code, tables, and callouts.",
+  "permissions": [
+    "activeTab",
+    "contextMenus",
+    "downloads",
+    "offscreen",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "action": {
+    "default_title": "Download page as Markdown"
+  },
+  "options_page": "src/options.html",
+  "icons": {
+    "16": "assets/icon16.png",
+    "32": "assets/icon32.png",
+    "48": "assets/icon48.png",
+    "128": "assets/icon128.png"
+  },
+  "homepage_url": "https://github.com/646826/page-to-md-pro",
+  "commands": {
+    "download-page-markdown": {
+      "suggested_key": {
+        "default": "Alt+Shift+D",
+        "mac": "Alt+Shift+D"
+      },
+      "description": "Download current page as Markdown"
+    },
+    "download-selection-markdown": {
+      "suggested_key": {
+        "default": "Alt+Shift+S",
+        "mac": "Alt+Shift+S"
+      },
+      "description": "Download selected content as Markdown"
+    }
+  }
+}

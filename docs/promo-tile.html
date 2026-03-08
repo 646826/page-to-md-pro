@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Promo Tile | Page to Markdown Pro</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #1c1917;
+        --muted: #57534e;
+        --accent: #0f766e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        width: 440px;
+        height: 280px;
+        overflow: hidden;
+        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+        color: var(--ink);
+        background:
+          radial-gradient(circle at 15% 22%, rgba(15, 118, 110, 0.24), transparent 26%),
+          radial-gradient(circle at 86% 16%, rgba(194, 65, 12, 0.16), transparent 22%),
+          linear-gradient(180deg, #fcfaf5 0%, #f2ede3 100%);
+      }
+
+      .wrap {
+        height: 100%;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+
+      .badge {
+        width: 64px;
+        height: 64px;
+        display: grid;
+        place-items: center;
+        border-radius: 18px;
+        background: rgba(255, 255, 255, 0.84);
+        border: 1px solid rgba(28, 25, 23, 0.10);
+        color: var(--accent);
+        font-size: 30px;
+        font-weight: 900;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: 34px;
+        line-height: 0.95;
+        letter-spacing: -0.04em;
+      }
+
+      p {
+        margin: 10px 0 0;
+        max-width: 320px;
+        font: 500 14px/1.4 Georgia, "Times New Roman", serif;
+        color: var(--muted);
+      }
+
+      .footer {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+
+      .pill {
+        padding: 8px 10px;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.74);
+        border: 1px solid rgba(28, 25, 23, 0.08);
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <div class="badge">MD</div>
+      <div>
+        <h1>Page to Markdown Pro</h1>
+        <p>Clean Markdown export for articles, docs, code, tables, and selected content.</p>
+      </div>
+      <div class="footer">
+        <span class="pill">One click</span>
+        <span class="pill">Local processing</span>
+        <span class="pill">Markdown download</span>
+      </div>
+    </main>
+  </body>
+</html>

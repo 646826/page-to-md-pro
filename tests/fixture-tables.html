@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Fixture Tables</title>
+    <script>
+      window.chrome = {
+        runtime: {
+          onMessage: {
+            addListener(fn) {
+              window.__pageToMdListener = fn;
+            }
+          }
+        }
+      };
+    </script>
+    <script src="../lib/Readability.js"></script>
+    <script src="../src/content.js"></script>
+  </head>
+  <body>
+    <main>
+      <article>
+        <h1>Table Fixture</h1>
+        <table>
+          <thead>
+            <tr><th>Name</th><th>Value</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Alpha</td><td>42</td></tr>
+            <tr><td>Beta</td><td>99</td></tr>
+          </tbody>
+        </table>
+        <table role="presentation">
+          <tr>
+            <td><img src="https://example.test/a.png" alt="A"></td>
+            <td><a href="https://example.test/cta">Click here</a></td>
+          </tr>
+        </table>
+      </article>
+    </main>
+    <script>
+      async function runExtraction() {
+        return new Promise((resolve) => {
+          window.__pageToMdListener(
+            {
+              type: 'page-to-md-extract',
+              payload: {
+                mode: 'main',
+                options: {
+                  includeFrontMatter: false,
+                  prependTitleHeadingIfMissing: true,
+                  includeSourceLink: false,
+                  includeImages: true,
+                  stripTrackingParams: true,
+                  tableMode: 'smart'
+                }
+              }
+            },
+            null,
+            (response) => {
+              window.__pageToMdResult = response;
+              document.body.setAttribute('data-test-finished', 'true');
+              resolve(response);
+            }
+          );
+        });
+      }
+      runExtraction();
+    </script>
+  </body>
+</html>

@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Fixture Article — Example Site</title>
+    <meta name="author" content="Alice Example">
+    <meta name="description" content="A sample article fixture for markdown export testing.">
+    <link rel="canonical" href="https://example.test/articles/fixture-article">
+    <script>
+      window.chrome = {
+        runtime: {
+          onMessage: {
+            addListener(fn) {
+              window.__pageToMdListener = fn;
+            }
+          }
+        }
+      };
+    </script>
+    <script src="../lib/Readability.js"></script>
+    <script src="../src/content.js"></script>
+    <style>
+      body { font-family: system-ui, sans-serif; }
+      nav, aside { color: #666; }
+      .admonition.note { border-left: 4px solid #5b6; padding: 8px 12px; }
+    </style>
+  </head>
+  <body>
+    <nav>Home / Docs / Fixture</nav>
+    <main>
+      <article class="article-body">
+        <h1>Fixture Article</h1>
+        <p>This is a <strong>sample</strong> paragraph with an <a href="/docs/link?utm_source=test">internal link</a>.</p>
+        <div class="admonition note">
+          <div class="admonition-title">Note</div>
+          <p>Callout content should become a markdown alert.</p>
+        </div>
+        <h2>Code</h2>
+        <pre><code class="language-js">function add(a, b) {
+  return a + b;
+}</code></pre>
+        <h2>Image</h2>
+        <figure>
+          <img data-src="/images/example.png" alt="Example image">
+          <figcaption>An example lazy image.</figcaption>
+        </figure>
+        <h2>List</h2>
+        <ul>
+          <li>First item</li>
+          <li>Second item
+            <ul>
+              <li>Nested item</li>
+            </ul>
+          </li>
+        </ul>
+      </article>
+      <aside>Related content</aside>
+    </main>
+    <script>
+      async function runExtraction() {
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        return new Promise((resolve) => {
+          window.__pageToMdListener(
+            {
+              type: 'page-to-md-extract',
+              payload: {
+                mode: 'auto',
+                options: {
+                  includeFrontMatter: true,
+                  prependTitleHeadingIfMissing: true,
+                  includeSourceLink: true,
+                  includeImages: true,
+                  stripTrackingParams: true,
+                  tableMode: 'smart'
+                }
+              }
+            },
+            null,
+            (response) => {
+              window.__pageToMdResult = response;
+              document.body.setAttribute('data-test-finished', 'true');
+              resolve(response);
+            }
+          );
+        });
+      }
+      runExtraction();
+    </script>
+  </body>
+</html>

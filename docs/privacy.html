@@ -1,0 +1,129 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Privacy Policy | Page to Markdown Pro</title>
+    <meta name="description" content="Privacy policy for the Page to Markdown Pro Chrome extension.">
+    <style>
+      :root {
+        color-scheme: light;
+        --bg: #faf7f2;
+        --text: #1f2937;
+        --muted: #4b5563;
+        --panel: #ffffff;
+        --border: #e5e7eb;
+        --accent: #0f766e;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font: 16px/1.6 Georgia, "Times New Roman", serif;
+        color: var(--text);
+        background: linear-gradient(180deg, #fffdf9 0%, var(--bg) 100%);
+      }
+
+      main {
+        max-width: 820px;
+        margin: 0 auto;
+        padding: 40px 20px 72px;
+      }
+
+      h1,
+      h2 {
+        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
+        letter-spacing: -0.02em;
+        line-height: 1.15;
+      }
+
+      h1 {
+        margin: 0 0 10px;
+        font-size: clamp(2rem, 4vw, 3.2rem);
+      }
+
+      h2 {
+        margin: 28px 0 12px;
+        font-size: 1.2rem;
+      }
+
+      p {
+        margin: 0 0 14px;
+      }
+
+      ul {
+        margin: 0;
+        padding-left: 20px;
+      }
+
+      li {
+        margin-bottom: 8px;
+      }
+
+      .meta,
+      .back {
+        color: var(--muted);
+      }
+
+      .panel {
+        padding: 24px;
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        background: var(--panel);
+      }
+
+      a {
+        color: var(--accent);
+      }
+    </style>
+  </head>
+  <body>
+    <main>
+      <p class="back"><a href="index.html">Page to Markdown Pro</a></p>
+      <h1>Privacy Policy</h1>
+      <p class="meta">Last updated: March 8, 2026</p>
+
+      <section class="panel">
+        <p>Page to Markdown Pro processes page content locally in your browser when you explicitly use the extension.</p>
+
+        <h2>What the extension does</h2>
+        <ul>
+          <li>Reads the active page or highlighted selection only after you click the toolbar button, use a keyboard shortcut, or choose a context-menu action.</li>
+          <li>Converts that content into Markdown locally on your device.</li>
+          <li>Saves your preferences using Chrome storage sync.</li>
+          <li>Saves the generated Markdown file locally through Chrome's downloads API.</li>
+        </ul>
+
+        <h2>What the extension does not do</h2>
+        <ul>
+          <li>It does not send page content, selections, generated Markdown, or browsing data to any developer-controlled server.</li>
+          <li>It does not use remote code, analytics beacons, or third-party tracking scripts.</li>
+          <li>It does not require an account or sign-in.</li>
+        </ul>
+
+        <h2>Data handling summary</h2>
+        <ul>
+          <li>Page content and selections are processed transiently in the browser to generate the Markdown output you requested.</li>
+          <li>Settings such as export preferences may be stored in <code>chrome.storage.sync</code>, which is managed by Chrome under your browser account settings.</li>
+          <li>Generated files are downloaded to your device and are not uploaded by the extension.</li>
+        </ul>
+
+        <h2>Permissions explained</h2>
+        <ul>
+          <li><code>activeTab</code>: temporarily access the current page after an explicit user action.</li>
+          <li><code>scripting</code>: inject the local extraction scripts into the active page.</li>
+          <li><code>downloads</code>: save the generated Markdown file.</li>
+          <li><code>contextMenus</code>: offer export actions from the page and selection context menus.</li>
+          <li><code>offscreen</code>: create Blob URLs for large downloads.</li>
+          <li><code>storage</code>: save user preferences.</li>
+        </ul>
+
+        <h2>Contact</h2>
+        <p>For privacy questions or requests, use the information on the <a href="support.html">support page</a>.</p>
+      </section>
+    </main>
+  </body>
+</html>

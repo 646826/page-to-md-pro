@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Page to Markdown Pro — Options</title>
+    <link rel="stylesheet" href="options.css">
+  </head>
+  <body>
+    <main class="container">
+      <header class="hero">
+        <h1>Page to Markdown Pro</h1>
+        <p>Default behavior for one-click Markdown export.</p>
+      </header>
+
+      <section class="card">
+        <h2>Click behavior</h2>
+        <label class="field">
+          <span>Toolbar click mode</span>
+          <select id="actionMode">
+            <option value="auto">Auto — choose the best content root</option>
+            <option value="main">Main content only</option>
+            <option value="full">Full page</option>
+          </select>
+        </label>
+        <label class="checkbox">
+          <input id="saveAs" type="checkbox">
+          <span>Show “Save As” dialog before downloading</span>
+        </label>
+      </section>
+
+      <section class="card two-col">
+        <div>
+          <h2>Markdown output</h2>
+          <label class="checkbox">
+            <input id="includeFrontMatter" type="checkbox">
+            <span>Include YAML front matter</span>
+          </label>
+          <label class="checkbox">
+            <input id="prependTitleHeadingIfMissing" type="checkbox">
+            <span>Add <code># Title</code> when the clip starts without a heading</span>
+          </label>
+          <label class="checkbox">
+            <input id="includeSourceLink" type="checkbox">
+            <span>Add a source link near the top of the file</span>
+          </label>
+          <label class="checkbox">
+            <input id="includeImages" type="checkbox">
+            <span>Keep meaningful images</span>
+          </label>
+          <label class="checkbox">
+            <input id="stripTrackingParams" type="checkbox">
+            <span>Strip tracking parameters from links</span>
+          </label>
+        </div>
+
+        <div>
+          <h2>Filenames</h2>
+          <label class="checkbox">
+            <input id="prependDateToFilename" type="checkbox">
+            <span>Prefix filenames with today’s date</span>
+          </label>
+          <label class="field">
+            <span>Maximum filename length</span>
+            <input id="maxFilenameLength" type="number" min="40" max="200" step="1">
+          </label>
+          <label class="field">
+            <span>Table mode</span>
+            <select id="tableMode">
+              <option value="smart">Smart — Markdown when safe, HTML fallback for complex tables</option>
+              <option value="markdown">Force Markdown tables whenever possible</option>
+              <option value="html">Always keep tables as HTML</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="card tips">
+        <h2>Usage</h2>
+        <ul>
+          <li>Click the toolbar icon for instant download.</li>
+          <li>Use the page context menu or <strong>Alt+Shift+D</strong> for a fast page export.</li>
+          <li>Use the selection context menu or <strong>Alt+Shift+S</strong> to export only highlighted content.</li>
+        </ul>
+      </section>
+
+      <footer class="footer">
+        <button id="saveButton" class="button">Save settings</button>
+        <span id="status" class="status" aria-live="polite"></span>
+      </footer>
+    </main>
+
+    <script src="options.js"></script>
+  </body>
+</html>

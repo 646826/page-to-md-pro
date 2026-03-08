@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Fixture Math</title>
+    <script>
+      window.chrome = {
+        runtime: {
+          onMessage: {
+            addListener(fn) {
+              window.__pageToMdListener = fn;
+            }
+          }
+        }
+      };
+    </script>
+    <script src="../lib/Readability.js"></script>
+    <script src="../src/content.js"></script>
+  </head>
+  <body>
+    <main>
+      <article>
+        <h1>Math Fixture</h1>
+        <p>Inline math <span class="katex"><span class="katex-mathml"><annotation encoding="application/x-tex">a^2+b^2=c^2</annotation></span></span> should survive.</p>
+        <div class="katex-display"><annotation encoding="application/x-tex">\\int_0^1 x^2 dx</annotation></div>
+        <details>
+          <summary>Expanded idea</summary>
+          <p>Details content that should stay readable.</p>
+        </details>
+      </article>
+    </main>
+    <script>
+      async function runExtraction() {
+        return new Promise((resolve) => {
+          window.__pageToMdListener(
+            {
+              type: 'page-to-md-extract',
+              payload: {
+                mode: 'main',
+                options: {
+                  includeFrontMatter: false,
+                  prependTitleHeadingIfMissing: true,
+                  includeSourceLink: false,
+                  includeImages: true,
+                  stripTrackingParams: true,
+                  tableMode: 'smart'
+                }
+              }
+            },
+            null,
+            (response) => {
+              window.__pageToMdResult = response;
+              document.body.setAttribute('data-test-finished', 'true');
+              resolve(response);
+            }
+          );
+        });
+      }
+      runExtraction();
+    </script>
+  </body>
+</html>
