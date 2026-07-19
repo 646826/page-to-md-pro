@@ -5,7 +5,9 @@ import { fileURLToPath } from 'node:url';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const readJson = async (relativePath) => JSON.parse(await readFile(path.join(root, relativePath), 'utf8'));
-const runtimeFiles = [
+const packagedFiles = [
+  'LICENSE',
+  'THIRD_PARTY_NOTICES.md',
   'manifest.json',
   'src/background.js',
   'src/content.js',
@@ -17,6 +19,7 @@ const runtimeFiles = [
   'src/options.js',
   'src/options.css',
   'lib/Readability.js',
+  'licenses/Apache-2.0.txt',
   'assets/icon16.png',
   'assets/icon32.png',
   'assets/icon48.png',
@@ -41,7 +44,7 @@ const permissions = [...(manifest.permissions || [])].sort();
 const expectedPermissions = ['activeTab', 'contextMenus', 'downloads', 'offscreen', 'scripting', 'storage'].sort();
 assert(JSON.stringify(permissions) === JSON.stringify(expectedPermissions), 'permission set changed unexpectedly');
 
-for (const relativePath of runtimeFiles) await access(path.join(root, relativePath));
+for (const relativePath of packagedFiles) await access(path.join(root, relativePath));
 for (const htmlPath of ['src/options.html', 'src/offscreen.html']) {
   const html = await readFile(path.join(root, htmlPath), 'utf8');
   for (const match of html.matchAll(/<script\b([^>]*)>/gi)) {
@@ -56,12 +59,12 @@ try {
   const result = spawnSync('unzip', ['-Z1', zipPath], { encoding: 'utf8' });
   assert(result.status === 0, result.stderr || 'Could not inspect release ZIP');
   const entries = result.stdout.split(/\r?\n/).filter(Boolean).sort();
-  assert(JSON.stringify(entries) === JSON.stringify(runtimeFiles), `ZIP entries differ from the runtime allowlist:\n${entries.join('\n')}`);
+  assert(JSON.stringify(entries) === JSON.stringify(packagedFiles), `ZIP entries differ from the package allowlist:\n${entries.join('\n')}`);
 } catch (error) {
   if (error?.code !== 'ENOENT') throw error;
 }
 
-console.log(`Package validation passed for version ${manifest.version} (${runtimeFiles.length} runtime files).`);
+console.log(`Package validation passed for version ${manifest.version} (${packagedFiles.length} packaged files).`);
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
