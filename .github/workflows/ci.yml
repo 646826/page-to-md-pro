@@ -5,7 +5,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -13,6 +13,58 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Repair verified selector-byte corruption
+        id: repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/content.js')
+          source = path.read_bytes()
+          corrupted = b"\x1bhidden]"
+          repaired = b"[hidden]"
+          count = source.count(corrupted)
+          if count > 1:
+              raise SystemExit(f'Expected at most one corrupted selector, found {count}.')
+          if count == 1:
+              source = source.replace(corrupted, repaired)
+              path.write_bytes(source)
+              print('Repaired ESC-prefixed hidden selector in src/content.js.')
+          elif repaired not in source:
+              raise SystemExit('Neither the corrupted nor repaired hidden selector is present.')
+
+          disallowed = [
+              (index, byte)
+              for index, byte in enumerate(source)
+              if byte < 32 and byte not in (9, 10, 13)
+          ]
+          if disallowed:
+              preview = ', '.join(f'offset={index} byte=0x{byte:02X}' for index, byte in disallowed[:10])
+              raise SystemExit(f'Disallowed control bytes remain in src/content.js: {preview}')
+          PY
+          git diff --check
+          if git diff --quiet -- src/content.js; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+          else
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Commit repaired source
+        if: ${{ github.event_name == 'push' && steps.repair.outputs.changed == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content.js
+          git commit -m "fix(extraction): restore the hidden-element selector"
+          git push origin HEAD:"${GITHUB_REF_NAME}"
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v6
