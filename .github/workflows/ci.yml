@@ -3,31 +3,29 @@ name: CI
 on:
   push:
   pull_request:
-  workflow_dispatch:
-    inputs:
-      assemble_release_source:
-        description: Reconstruct the verified release payload on the release branch
-        required: true
-        type: boolean
-        default: false
 
 permissions:
   contents: write
 
 jobs:
-  assemble-release-source:
-    if: ${{ github.event_name == 'workflow_dispatch' && inputs.assemble_release_source == true }}
+  test:
     runs-on: ubuntu-latest
     steps:
-      - name: Check out release branch
+      - name: Check out repository
         uses: actions/checkout@v6
         with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
           fetch-depth: 0
 
-      - name: Reconstruct and verify source payloads
+      - name: Reconstruct verified release payload when present
+        id: assemble
         shell: bash
         run: |
           set -euo pipefail
+          if [[ ! -d .release-content ]]; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+            exit 0
+          fi
 
           cat .release-content/content.b64.part.* | base64 --decode > src/content.js
           echo "80cc10402cf119610f1ecaeb37a564b2f2a4dbb8ba3e58d8e6ea412c1380648f  src/content.js" | sha256sum --check --strict
@@ -42,25 +40,8 @@ jobs:
           find tests -type f -print0 | sort -z | xargs -0 -n1 sh -c 'case "$1" in *.js|*.mjs) node --check "$1" ;; esac' _
           rm -rf .release-content
           git diff --check
+          echo "changed=true" >> "${GITHUB_OUTPUT}"
 
-      - name: Commit reconstructed files
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A src/content.js tests .release-content
-          git commit -m "feat: complete 0.2.0 extraction and test suite"
-          git push origin HEAD:codex/release-0.2.0-modernization
-
-  test:
-    if: ${{ github.event_name != 'workflow_dispatch' || inputs.assemble_release_source != true }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v6
-        with:
-          persist-credentials: false
       - name: Set up Node.js 24
         uses: actions/setup-node@v6
         with:
@@ -76,6 +57,18 @@ jobs:
         run: npm run build:zip
       - name: Validate release package allowlist
         run: npm run validate:package
+
+      - name: Commit reconstructed release files
+        if: ${{ steps.assemble.outputs.changed == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A src/content.js tests .release-content
+          git commit -m "feat: complete 0.2.0 extraction and test suite"
+          git push origin HEAD:${{ github.head_ref }}
+
       - name: Upload verified package
         uses: actions/upload-artifact@v7
         with:
