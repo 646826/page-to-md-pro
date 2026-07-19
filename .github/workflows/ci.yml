@@ -50,8 +50,20 @@ jobs:
       - name: Test Chrome Web Store upload-only behavior
         run: node --test tests/cws-release.test.mjs
 
-      - name: Run Chromium fixture tests
-        run: npm run test:fixtures
+      - name: Test article, table, and math fixtures
+        run: node tests/run-fixture-tests.mjs fixture-article.html fixture-tables.html fixture-math.html
+
+      - name: Test modern, URL, and security fixtures
+        run: node tests/run-fixture-tests.mjs fixture-modern-web.html fixture-base-url.html fixture-security.html
+
+      - name: Test selection-media fixture
+        run: node tests/run-fixture-tests.mjs fixture-selection-media.html
+
+      - name: Test large-DOM fixture
+        run: node tests/run-fixture-tests.mjs fixture-large-dom.html
+
+      - name: Test over-budget selection fixture
+        run: node tests/run-fixture-tests.mjs fixture-large-selection.html
 
       - name: Validate source package
         run: npm run validate:package
