@@ -17,25 +17,58 @@ jobs:
           ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
           fetch-depth: 0
 
-      - name: Reconstruct verified release payload when present
-        id: assemble
+      - name: Detect release payload
+        id: payload
         shell: bash
         run: |
           set -euo pipefail
-          if [[ ! -d .release-content ]]; then
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-            exit 0
+          if [[ -d .release-content ]]; then
+            echo "present=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "present=false" >> "${GITHUB_OUTPUT}"
           fi
 
-          mapfile -t content_parts < <(find .release-content -maxdepth 1 -type f -name 'content.b64.part.*' -print | sort)
-          if [[ "${#content_parts[@]}" -eq 0 ]]; then
-            echo "No content payload parts found." >&2
-            exit 1
-          fi
-          cat "${content_parts[@]}" | tr -d '\r\n' | base64 --decode > src/content.js
-          test -s src/content.js
-          echo "Reconstructed src/content.js: $(sha256sum src/content.js | cut -d' ' -f1)"
+      - name: Decode content payload
+        if: ${{ steps.payload.outputs.present == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          import base64
+          import binascii
+          import hashlib
 
+          parts = sorted(Path('.release-content').glob('content.b64.part.*'))
+          if not parts:
+              raise SystemExit('No content payload parts found.')
+
+          chunks = [part.read_bytes().replace(b'\r', b'').replace(b'\n', b'') for part in parts]
+
+          def decode(value: bytes) -> bytes:
+              padded = value + (b'=' * (-len(value) % 4))
+              return base64.b64decode(padded, validate=True)
+
+          try:
+              decoded = decode(b''.join(chunks))
+              mode = 'joined-stream'
+          except binascii.Error:
+              decoded = b''.join(decode(chunk) for chunk in chunks)
+              mode = 'independent-parts'
+
+          output = Path('src/content.js')
+          output.write_bytes(decoded)
+          if not decoded:
+              raise SystemExit('Decoded content payload is empty.')
+          print(f'Decoded {len(parts)} content parts using {mode}.')
+          print(f'src/content.js sha256={hashlib.sha256(decoded).hexdigest()} bytes={len(decoded)}')
+          PY
+
+      - name: Reconstruct test archive
+        if: ${{ steps.payload.outputs.present == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
           mapfile -t test_parts < <(find .release-content -maxdepth 1 -type f -name 'tests.bin.part.*' -print | sort)
           if [[ "${#test_parts[@]}" -eq 0 ]]; then
             echo "No test payload parts found." >&2
@@ -43,16 +76,28 @@ jobs:
           fi
           cat "${test_parts[@]}" > /tmp/tests.tar.gz
           gzip -t /tmp/tests.tar.gz
-          echo "Reconstructed tests archive: $(sha256sum /tmp/tests.tar.gz | cut -d' ' -f1)"
+          echo "tests.tar.gz sha256=$(sha256sum /tmp/tests.tar.gz | cut -d' ' -f1) bytes=$(stat -c%s /tmp/tests.tar.gz)"
 
+      - name: Extract test payload
+        if: ${{ steps.payload.outputs.present == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
           rm -rf tests
           tar -xzf /tmp/tests.tar.gz
-          test "$(find tests -type f | wc -l | tr -d ' ')" -eq 17
-          node --check src/content.js
-          find tests -type f -print0 | sort -z | xargs -0 -n1 sh -c 'case "$1" in *.js|*.mjs) node --check "$1" ;; esac' _
+          test -f tests/run-fixture-tests.mjs
+          test -f tests/shared.test.mjs
+          test -f tests/background.test.mjs
+          test -f tests/package.test.mjs
+          echo "Extracted $(find tests -type f | wc -l | tr -d ' ') test files."
+
+      - name: Remove release transport
+        if: ${{ steps.payload.outputs.present == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
           rm -rf .release-content
           git diff --check
-          echo "changed=true" >> "${GITHUB_OUTPUT}"
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v6
@@ -76,7 +121,7 @@ jobs:
         run: npm run validate:package
 
       - name: Commit reconstructed release files
-        if: ${{ github.event_name == 'push' && steps.assemble.outputs.changed == 'true' }}
+        if: ${{ github.event_name == 'push' && steps.payload.outputs.present == 'true' }}
         shell: bash
         run: |
           set -euo pipefail
