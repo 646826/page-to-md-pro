@@ -107,7 +107,7 @@ test('redistributable license files exist for the extension and bundled Readabil
   assert.match(notices, /Apache License 2\.0/);
 });
 
-test('workflows use current Node 24 action runtimes and keep automated releases upload-only', async () => {
+test('workflows use current Node 24 actions and create releases only after verified upload-only delivery', async () => {
   const ci = await readFile(path.join(root, '.github/workflows/ci.yml'), 'utf8');
   const release = await readFile(path.join(root, '.github/workflows/chrome-web-store-release.yml'), 'utf8');
   const ignore = await readFile(path.join(root, '.gitignore'), 'utf8');
@@ -117,13 +117,30 @@ test('workflows use current Node 24 action runtimes and keep automated releases 
     assert.match(workflow, /actions\/setup-node@v6/);
     assert.match(workflow, /node-version:\s*24/);
   }
+
+  assert.match(ci, /push:\s*\n\s*branches:\s*\[main\]\s*\n\s*pull_request:/,
+    'feature branches must use the pull_request check instead of a duplicate push check');
   assert.match(ci, /actions\/upload-artifact@v7/);
   assert.match(release, /actions\/upload-artifact@v7/);
-  const artifactIndex = release.indexOf('uses: actions/upload-artifact@v7');
-  const storeUploadIndex = release.indexOf('name: Upload and optionally submit to the Chrome Web Store');
+
+  const packageArtifactIndex = release.indexOf('name: Upload workflow artifact');
+  const storeUploadIndex = release.indexOf('name: Upload to Chrome Web Store and verify delivery mode');
+  const evidenceArtifactIndex = release.indexOf('name: Upload verified delivery evidence');
   const githubReleaseIndex = release.indexOf('name: Create GitHub Release after successful store upload');
-  assert.ok(artifactIndex >= 0 && storeUploadIndex > artifactIndex && githubReleaseIndex > storeUploadIndex,
-    'internal artifact validation must finish before store upload, and GitHub Release must follow store success');
+  assert.ok(
+    packageArtifactIndex >= 0
+      && storeUploadIndex > packageArtifactIndex
+      && evidenceArtifactIndex > storeUploadIndex
+      && githubReleaseIndex > evidenceArtifactIndex,
+    'ZIP validation must precede store upload, and verified evidence must precede GitHub Release creation'
+  );
+
+  assert.match(release, /grep -Fq 'Upload finished successfully\.'/);
+  assert.match(release, /grep -Fq 'Skipping publish step\.'/);
+  assert.match(release, /chromeWebStoreUpload:\s*'SUCCEEDED'/);
+  assert.match(release, /publishSubmission:\s*uploadOnly \? 'SKIPPED' : 'REQUESTED'/);
+  assert.match(release, /gh release create "\$\{TAG\}" page-to-md-pro\.zip release-evidence\.json/);
+
   assert.match(release, /if \[\[ "\$\{EVENT_NAME\}" == "push" \]\];[\s\S]*publish_type="UPLOAD_ONLY"/);
   const pushStart = release.indexOf('if [[ "${EVENT_NAME}" == "push" ]]');
   const releaseEnable = release.indexOf('create_release=true');
