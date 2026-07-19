@@ -51,7 +51,19 @@ jobs:
         run: node --test tests/cws-release.test.mjs
 
       - name: Test article fixture
-        run: node tests/run-fixture-tests.mjs fixture-article.html
+        shell: bash
+        run: |
+          set -o pipefail
+          node tests/run-fixture-tests.mjs fixture-article.html 2>&1 | tee article-fixture.log
+
+      - name: Upload article fixture diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: article-fixture-diagnostics-${{ github.sha }}
+          path: article-fixture.log
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Test table fixture
         run: node tests/run-fixture-tests.mjs fixture-tables.html
