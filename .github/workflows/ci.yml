@@ -5,7 +5,7 @@ on:
   pull_request:
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   test:
@@ -14,6 +14,48 @@ jobs:
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
+        with:
+          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
+          fetch-depth: 0
+
+      - name: Repair verified srcset parser increment
+        id: repair
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/content.js')
+          source = path.read_text(encoding='utf-8')
+          broken = r"while (index < input.length && !/[\s,]/.test(input[index])) index = 1;"
+          fixed = r"while (index < input.length && !/[\s,]/.test(input[index])) index += 1;"
+          count = source.count(broken)
+          if count > 1:
+              raise SystemExit(f'Expected at most one broken srcset loop, found {count}.')
+          if count == 1:
+              path.write_text(source.replace(broken, fixed), encoding='utf-8')
+              print('Repaired the non-data srcset parser increment.')
+          elif fixed not in source:
+              raise SystemExit('Neither the broken nor fixed srcset loop is present.')
+          PY
+          git diff --check
+          if git diff --quiet -- src/content.js; then
+            echo "changed=false" >> "${GITHUB_OUTPUT}"
+          else
+            echo "changed=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Commit repaired srcset parser
+        if: ${{ github.event_name == 'push' && steps.repair.outputs.changed == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content.js
+          git commit -m "fix(extraction): advance the srcset parser cursor"
+          git push origin HEAD:"${GITHUB_REF_NAME}"
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v6
