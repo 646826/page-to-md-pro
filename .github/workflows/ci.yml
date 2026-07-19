@@ -99,6 +99,21 @@ jobs:
           rm -rf .release-content
           git diff --check
 
+      - name: Commit reconstructed release files
+        if: ${{ github.event_name == 'push' && steps.payload.outputs.present == 'true' }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A src/content.js tests .release-content
+          if git diff --cached --quiet; then
+            echo "No reconstructed changes to commit."
+          else
+            git commit -m "feat: materialize 0.2.0 extraction and test suite"
+            git push origin HEAD:"${GITHUB_REF_NAME}"
+          fi
+
       - name: Set up Node.js 24
         uses: actions/setup-node@v6
         with:
@@ -128,21 +143,6 @@ jobs:
 
       - name: Validate release package allowlist
         run: npm run validate:package
-
-      - name: Commit reconstructed release files
-        if: ${{ github.event_name == 'push' && steps.payload.outputs.present == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add -A src/content.js tests .release-content
-          if git diff --cached --quiet; then
-            echo "No reconstructed changes to commit."
-            exit 0
-          fi
-          git commit -m "feat: complete 0.2.0 extraction and test suite"
-          git push origin HEAD:"${GITHUB_REF_NAME}"
 
       - name: Upload verified package
         uses: actions/upload-artifact@v7
