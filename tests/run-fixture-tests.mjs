@@ -66,12 +66,24 @@ const fixtures = [
   }
 ];
 
+const requestedFiles = new Set(process.argv.slice(2));
+const knownFiles = new Set(fixtures.map((fixture) => fixture.file));
+for (const requested of requestedFiles) {
+  if (!knownFiles.has(requested)) {
+    throw new Error(`Unknown fixture: ${requested}`);
+  }
+}
+const selectedFixtures = requestedFiles.size > 0
+  ? fixtures.filter((fixture) => requestedFiles.has(fixture.file))
+  : fixtures;
+
 const executablePath = process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE
   || (fs.existsSync('/usr/bin/chromium') ? '/usr/bin/chromium' : undefined);
 const browser = await chromium.launch({ headless: true, executablePath, args: ['--no-sandbox'] });
 let failures = 0;
 
-for (const fixture of fixtures) {
+for (const fixture of selectedFixtures) {
+  console.log(`→ ${fixture.file}`);
   const page = await browser.newPage();
   const consoleErrors = [];
   const onConsole = (message) => { if (message.type() === 'error') consoleErrors.push(message.text()); };
