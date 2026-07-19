@@ -3,162 +3,56 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Page to Markdown Pro exports pages and selections as clean Markdown locally in Chromium browsers.">
     <title>Page to Markdown Pro</title>
-    <meta name="description" content="One-click Chrome extension that exports the current page or selected content as clean Markdown.">
     <style>
-      :root {
-        color-scheme: light;
-        --bg: #f4f1ea;
-        --panel: rgba(255, 255, 255, 0.78);
-        --border: rgba(41, 37, 36, 0.12);
-        --text: #1c1917;
-        --muted: #57534e;
-        --accent: #0f766e;
-        --accent-strong: #115e59;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        font: 16px/1.6 Georgia, "Times New Roman", serif;
-        color: var(--text);
-        background:
-          radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 34%),
-          radial-gradient(circle at top right, rgba(180, 83, 9, 0.12), transparent 28%),
-          linear-gradient(180deg, #f8f5ef 0%, var(--bg) 100%);
-      }
-
-      .wrap {
-        max-width: 960px;
-        margin: 0 auto;
-        padding: 48px 20px 72px;
-      }
-
-      .hero {
-        margin-bottom: 24px;
-      }
-
-      h1,
-      h2 {
-        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
-        line-height: 1.1;
-        letter-spacing: -0.02em;
-      }
-
-      h1 {
-        margin: 0 0 12px;
-        font-size: clamp(2.4rem, 5vw, 4.4rem);
-      }
-
-      h2 {
-        margin: 0 0 14px;
-        font-size: 1.3rem;
-      }
-
-      p {
-        margin: 0 0 14px;
-        max-width: 68ch;
-      }
-
-      .lede {
-        font-size: 1.1rem;
-        color: var(--muted);
-      }
-
-      .grid {
-        display: grid;
-        gap: 18px;
-        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-        margin: 32px 0;
-      }
-
-      .card {
-        padding: 22px;
-        border: 1px solid var(--border);
-        border-radius: 18px;
-        background: var(--panel);
-        backdrop-filter: blur(10px);
-      }
-
-      ul {
-        margin: 0;
-        padding-left: 18px;
-      }
-
-      a {
-        color: var(--accent-strong);
-      }
-
-      .actions {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 12px;
-        margin-top: 18px;
-      }
-
-      .button {
-        display: inline-block;
-        padding: 12px 16px;
-        border-radius: 999px;
-        text-decoration: none;
-        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
-        font-weight: 700;
-        border: 1px solid var(--accent);
-      }
-
-      .button.primary {
-        background: var(--accent);
-        color: #ffffff;
-      }
-
-      .button.secondary {
-        color: var(--accent-strong);
-        background: rgba(255, 255, 255, 0.55);
-      }
+      :root { color-scheme: light dark; font: 16px/1.6 system-ui, sans-serif; }
+      * { box-sizing: border-box; }
+      body { margin: 0; background: Canvas; color: CanvasText; }
+      main { width: min(940px, calc(100% - 32px)); margin: 0 auto; padding: 64px 0 80px; }
+      h1 { margin: 0; font-size: clamp(2.4rem, 7vw, 5rem); line-height: 1; letter-spacing: -.045em; }
+      h2 { margin-top: 0; font-size: 1.15rem; }
+      .lede { max-width: 720px; margin: 24px 0; font-size: 1.15rem; }
+      .actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 28px 0 44px; }
+      .actions a { padding: 10px 16px; border: 1px solid ButtonBorder; border-radius: 999px; color: LinkText; text-decoration: none; }
+      .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+      article { padding: 22px; border: 1px solid ButtonBorder; border-radius: 16px; }
+      ul { padding-left: 20px; }
+      code { font-family: ui-monospace, monospace; }
     </style>
   </head>
   <body>
-    <main class="wrap">
-      <header class="hero">
-        <h1>Page to Markdown Pro</h1>
-        <p class="lede">Export the current page or selected content as a clean Markdown file in one click.</p>
-        <p>Built for articles, docs, code-heavy pages, tables, callouts, and math without requiring broad host permissions.</p>
-        <div class="actions">
-          <a class="button primary" href="https://github.com/646826/page-to-md-pro">View on GitHub</a>
-          <a class="button secondary" href="support.html">Support</a>
-          <a class="button secondary" href="privacy.html">Privacy Policy</a>
-        </div>
-      </header>
-
-      <section class="grid" aria-label="Key details">
-        <article class="card">
-          <h2>How it works</h2>
+    <main>
+      <h1>Page to Markdown Pro</h1>
+      <p class="lede">Export the active page or selection as clean Markdown in one click. Version 0.2.0 improves modern component extraction, task lists, metadata, safe links, and large-download reliability while keeping processing local.</p>
+      <nav class="actions" aria-label="Project links">
+        <a href="https://github.com/646826/page-to-md-pro">Source and releases</a>
+        <a href="support.html">Support</a>
+        <a href="privacy.html">Privacy policy</a>
+      </nav>
+      <section class="grid" aria-label="Highlights">
+        <article>
+          <h2>High-fidelity Markdown</h2>
           <ul>
-            <li>Click the extension action, use a shortcut, or use the context menu.</li>
-            <li>The extension processes the active page locally in your browser.</li>
-            <li>A Markdown file is generated and saved to your device.</li>
+            <li>Articles, documentation, code, tables, math, callouts, and details</li>
+            <li>Task lists, lazy or placeholder images, selection-only media, and Article-like JSON-LD</li>
+            <li>Open Shadow DOM and slot content when the page exposes it</li>
           </ul>
         </article>
-
-        <article class="card">
-          <h2>What it focuses on</h2>
+        <article>
+          <h2>Reliable by default</h2>
           <ul>
-            <li>Readable Markdown output with front matter.</li>
-            <li>Code blocks, callouts, tables, and math preservation.</li>
-            <li>Selection export and large-file download fallback.</li>
+            <li>One active capture per tab/request with bounded retry and timeout behavior</li>
+            <li>Blob URLs stay valid until large downloads finish or stop</li>
+            <li>Unsafe active URL protocols are emitted as text, not links</li>
           </ul>
         </article>
-
-        <article class="card">
-          <h2>Project links</h2>
+        <article>
+          <h2>Local and minimal</h2>
           <ul>
-            <li><a href="https://github.com/646826/page-to-md-pro">Repository</a></li>
-            <li><a href="https://github.com/646826/page-to-md-pro/issues">Issue tracker</a></li>
-            <li><a href="privacy.html">Privacy policy</a></li>
-            <li><a href="support.html">Support</a></li>
+            <li>No host permissions, accounts, telemetry, or remote code</li>
+            <li>Page content is processed in the active browser tab</li>
+            <li>Only preferences use extension storage</li>
           </ul>
         </article>
       </section>

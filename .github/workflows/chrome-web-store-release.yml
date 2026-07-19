@@ -1,26 +1,29 @@
 name: Chrome Web Store Release
 
 on:
+  push:
+    branches: [main]
   workflow_dispatch:
     inputs:
       publish_type:
-        description: "Upload only, submit for immediate publish, or stage after approval"
+        description: Upload only, submit for immediate publish, or stage after approval
         required: true
         type: choice
         default: UPLOAD_ONLY
-        options:
-          - UPLOAD_ONLY
-          - DEFAULT_PUBLISH
-          - STAGED_PUBLISH
+        options: [UPLOAD_ONLY, DEFAULT_PUBLISH, STAGED_PUBLISH]
       skip_review:
-        description: "Attempt to skip review when the item is eligible"
+        description: Attempt to skip review when the item is eligible
         required: true
         type: boolean
         default: false
 
 permissions:
-  contents: read
+  contents: write
   id-token: write
+
+concurrency:
+  group: chrome-web-store-release
+  cancel-in-progress: false
 
 jobs:
   release:
@@ -30,42 +33,88 @@ jobs:
       GCP_WORKLOAD_IDENTITY_PROVIDER: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
       GCP_SERVICE_ACCOUNT: ${{ secrets.GCP_SERVICE_ACCOUNT }}
       GOOGLE_CREDENTIALS: ${{ secrets.GOOGLE_CREDENTIALS }}
-
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/checkout@v6
         with:
-          node-version: 20
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Resolve version and release mode
+        id: release
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          REQUESTED_PUBLISH_TYPE: ${{ inputs.publish_type || 'UPLOAD_ONLY' }}
+          REQUESTED_SKIP_REVIEW: ${{ inputs.skip_review || false }}
+        shell: bash
+        run: |
+          version="$(node -p "JSON.parse(require('node:fs').readFileSync('manifest.json', 'utf8')).version")"
+          tag="v${version}"
+          tag_exists=false
+          if git rev-parse -q --verify "refs/tags/${tag}" >/dev/null; then
+            tag_exists=true
+          fi
+
+          should_upload=true
+          create_release=false
+          publish_type="${REQUESTED_PUBLISH_TYPE}"
+          skip_review="${REQUESTED_SKIP_REVIEW}"
+          if [[ "${EVENT_NAME}" == "push" ]]; then
+            publish_type="UPLOAD_ONLY"
+            skip_review="false"
+            if [[ "${tag_exists}" == "true" ]]; then
+              should_upload=false
+            else
+              create_release=true
+            fi
+          fi
+
+          echo "version=${version}" >> "${GITHUB_OUTPUT}"
+          echo "tag=${tag}" >> "${GITHUB_OUTPUT}"
+          echo "should_upload=${should_upload}" >> "${GITHUB_OUTPUT}"
+          echo "create_release=${create_release}" >> "${GITHUB_OUTPUT}"
+          echo "publish_type=${publish_type}" >> "${GITHUB_OUTPUT}"
+          echo "skip_review=${skip_review}" >> "${GITHUB_OUTPUT}"
+      - name: Report existing release
+        if: ${{ steps.release.outputs.should_upload != 'true' }}
+        run: echo "${{ steps.release.outputs.tag }} already exists; automated upload is idempotently skipped."
+      - name: Set up Node.js 24
+        if: ${{ steps.release.outputs.should_upload == 'true' }}
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
           cache: npm
-
       - name: Install dependencies
+        if: ${{ steps.release.outputs.should_upload == 'true' }}
         run: npm ci
-
-      - name: Install Playwright browser and OS dependencies
+      - name: Install Playwright Chromium and OS dependencies
+        if: ${{ steps.release.outputs.should_upload == 'true' }}
         run: npx playwright install --with-deps chromium
-
-      - name: Run fixture tests
+      - name: Run full verification
+        if: ${{ steps.release.outputs.should_upload == 'true' }}
         run: npm test
-
-      - name: Build Chrome Web Store package
-        run: npm run build:zip
-
+      - name: Build and validate package
+        if: ${{ steps.release.outputs.should_upload == 'true' }}
+        run: npm run build:zip && npm run validate:package
+      - name: Upload workflow artifact
+        if: ${{ steps.release.outputs.should_upload == 'true' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: page-to-md-pro-${{ steps.release.outputs.version }}
+          path: page-to-md-pro.zip
+          if-no-files-found: error
       - id: auth_wif
         name: Authenticate with Google Cloud via Workload Identity Federation
-        if: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' }}
+        if: ${{ steps.release.outputs.should_upload == 'true' && env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '' }}
         uses: google-github-actions/auth@v3
         with:
           workload_identity_provider: ${{ env.GCP_WORKLOAD_IDENTITY_PROVIDER }}
           service_account: ${{ env.GCP_SERVICE_ACCOUNT }}
           token_format: access_token
           access_token_scopes: https://www.googleapis.com/auth/chromewebstore
-
+          create_credentials_file: false
       - id: auth_key
         name: Generate access token from Service Account Key
-        if: ${{ !(env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '') && env.GOOGLE_CREDENTIALS != '' }}
+        if: ${{ steps.release.outputs.should_upload == 'true' && !(env.GCP_WORKLOAD_IDENTITY_PROVIDER != '' && env.GCP_SERVICE_ACCOUNT != '') && env.GOOGLE_CREDENTIALS != '' }}
         shell: bash
         run: |
           token="$(node scripts/google-access-token.mjs)"
@@ -74,27 +123,36 @@ jobs:
             exit 1
           fi
           echo "access_token=${token}" >> "${GITHUB_OUTPUT}"
-
       - id: resolve_token
         name: Resolve access token
+        if: ${{ steps.release.outputs.should_upload == 'true' }}
         shell: bash
         run: |
           token="${{ steps.auth_wif.outputs.access_token }}"
-          if [[ -z "${token}" ]]; then
-            token="${{ steps.auth_key.outputs.access_token }}"
-          fi
+          if [[ -z "${token}" ]]; then token="${{ steps.auth_key.outputs.access_token }}"; fi
           if [[ -z "${token}" ]]; then
             echo "Failed to obtain a Chrome Web Store API access token." >&2
             exit 1
           fi
           echo "::add-mask::${token}"
           echo "access_token=${token}" >> "${GITHUB_OUTPUT}"
-
       - name: Upload and optionally submit to the Chrome Web Store
+        if: ${{ steps.release.outputs.should_upload == 'true' }}
         env:
           CWS_ACCESS_TOKEN: ${{ steps.resolve_token.outputs.access_token }}
           CWS_PUBLISHER_ID: ${{ secrets.CWS_PUBLISHER_ID }}
           CWS_EXTENSION_ID: ${{ secrets.CWS_EXTENSION_ID }}
-          CWS_PUBLISH_TYPE: ${{ inputs.publish_type }}
-          CWS_SKIP_REVIEW: ${{ inputs.skip_review }}
+          CWS_PUBLISH_TYPE: ${{ steps.release.outputs.publish_type }}
+          CWS_SKIP_REVIEW: ${{ steps.release.outputs.skip_review }}
         run: bash scripts/cws-release.sh page-to-md-pro.zip
+      - name: Create GitHub Release after successful store upload
+        if: ${{ steps.release.outputs.should_upload == 'true' && steps.release.outputs.create_release == 'true' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.release.outputs.tag }}
+          VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          gh release create "${TAG}" page-to-md-pro.zip \
+            --target "${GITHUB_SHA}" \
+            --title "Page to Markdown Pro ${VERSION}" \
+            --generate-notes

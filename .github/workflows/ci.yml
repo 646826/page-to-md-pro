@@ -4,25 +4,36 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
 jobs:
   test:
     runs-on: ubuntu-latest
-
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
-
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+        uses: actions/checkout@v6
         with:
-          node-version: 20
+          persist-credentials: false
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
           cache: npm
-
       - name: Install dependencies
         run: npm ci
-
-      - name: Install Playwright browser and OS dependencies
+      - name: Install Playwright Chromium and OS dependencies
         run: npx playwright install --with-deps chromium
-
-      - name: Run fixture tests
-        run: npm run test:fixtures
+      - name: Run syntax, unit, fixture, and package checks
+        run: npm test
+      - name: Build Chrome Web Store package
+        run: npm run build:zip
+      - name: Validate release package allowlist
+        run: npm run validate:package
+      - name: Upload verified package
+        uses: actions/upload-artifact@v7
+        with:
+          name: page-to-md-pro-${{ github.sha }}
+          path: page-to-md-pro.zip
+          if-no-files-found: error
+          retention-days: 14

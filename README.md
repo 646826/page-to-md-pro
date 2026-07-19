@@ -1,101 +1,125 @@
 # Page to Markdown Pro
 
-One-click Chrome extension that exports the current page or highlighted selection as a clean Markdown file.
+Page to Markdown Pro is a local-first Chromium extension that exports the active page or highlighted selection as a clean Markdown file.
 
-## Features
+Version **0.2.0** focuses on generic reliability: bounded extraction, safer downloads, modern component support, stronger URL sanitization, deterministic packaging, and broader automated coverage without adding host permissions, telemetry, or remote code.
 
-- Export **current page**, **main content**, or **selected text**.
-- Default one-click download from the extension icon.
-- Context menu actions for page and selection.
-- Keyboard shortcuts:
-  - `Alt+Shift+D` — download current page.
-  - `Alt+Shift+S` — download selection.
-- YAML front matter with page metadata.
-- Optional title heading insertion.
-- Tracking-parameter stripping from links.
-- Lazy-image normalization.
-- Callout/admonition conversion to Markdown alerts.
-- Smart tables:
-  - regular data tables → Markdown table
-  - layout tables → flattened readable content
-  - complex tables → HTML fallback
-- Math preservation (KaTeX / MathJax).
-- Large Markdown download fallback through an offscreen Blob document.
+## Highlights
 
-## How it works
-
-1. User clicks the action / shortcut / context menu.
-2. The service worker injects `Readability.js` + `content.js` into the active tab.
-3. The content script chooses a root:
-   - current selection
-   - Readability output
-   - best semantic content container
-   - full body fallback
-4. The DOM clone is cleaned and normalized.
-5. Markdown is generated with custom rules for headings, lists, links, images, callouts, code blocks, tables, and details.
-6. The service worker downloads the `.md` file.
+- Export the **best content root**, **main content**, **full page**, or **current selection**.
+- One-click toolbar action, context-menu actions, and keyboard shortcuts.
+- Readability plus a semantic fallback for articles, documentation, wikis, and code-heavy pages.
+- YAML front matter from regular metadata and Article-like JSON-LD.
+- Code fences with language detection, nested lists, callouts, details, math, figures, and smart tables.
+- GitHub-style task lists and content from **open Shadow DOM** and slots.
+- Lazy/placeholder-image normalization, image-only selection export, and meaningful video/audio source links.
+- Tracking-parameter removal and active-protocol filtering.
+- Per-tab and per-request capture deduplication, bounded retries, ordered status badges, and timeout errors.
+- Large downloads through an offscreen Blob URL that remains alive until Chrome reports completion or interruption.
+- Local processing only. Page data is not sent to developer-controlled servers.
 
 ## Install locally
 
 1. Open `chrome://extensions`.
 2. Enable **Developer mode**.
-3. Click **Load unpacked**.
-4. Select the `page-to-md-pro` folder.
-5. Pin the extension for single-click use.
+3. Select **Load unpacked**.
+4. Choose the repository root.
+5. Pin the extension.
 
-To work on local `file://` pages, open the extension details and enable **Allow access to file URLs**.
+To export local `file://` pages, enable **Allow access to file URLs** in the extension details.
 
-## Project structure
+## Use
 
+- Click the toolbar icon to use the configured automatic mode.
+- Right-click a page to export the best content root or main content.
+- Right-click a selection to export only that selection.
+- Press `Alt+Shift+D` to export the page.
+- Press `Alt+Shift+S` to export the selection.
+
+The options page controls front matter, source links, images, tracking parameters, table behavior, filenames, and the toolbar mode.
+
+## How extraction works
+
+1. The Manifest V3 service worker accepts an explicit user action and ensures one active capture per tab.
+2. Local `Readability.js` and `src/content.js` are injected into the active tab through `activeTab` and `scripting`.
+3. The content script waits for a short, bounded DOM quiet period and collects standard and JSON-LD metadata.
+4. It creates a composed DOM snapshot, materializes open shadow roots and slots without hidden light-DOM duplicates, and compares Readability with semantic candidates.
+5. The selected clone is normalized and converted with custom Markdown rules.
+6. The service worker downloads the result. Large files use an offscreen Blob URL and terminal download-state tracking.
+
+Closed shadow roots, cross-origin frames, canvas-only content, and content a site never renders into the active DOM cannot be extracted generically. After installing an extension update, reload an already-open page to ensure it receives the updated injected extractor.
+
+## Architecture
+
+```text
+manifest.json             Manifest V3 metadata and minimal permissions
+src/background.js         Event handling, capture orchestration, downloads
+src/shared.js             Pure option, URL, timeout, and filename utilities
+src/storage.js            Sync storage with local fallback
+src/content.js            DOM snapshot, extraction, sanitization, Markdown rendering
+src/offscreen.*           Large-download Blob URL lifecycle
+src/options.*             Extension preferences
+lib/Readability.js        Bundled Mozilla Readability
+scripts/                  Validation, packaging, and Chrome Web Store upload
+tests/                    Node unit tests and Playwright browser fixtures
+.github/workflows/        CI and upload-only release automation
 ```
-manifest.json          Manifest V3 extension manifest
-src/background.js      Toolbar click, shortcuts, context menus, downloads
-src/content.js         DOM extraction, cleanup, Markdown generation
-src/options.*          Options page
-src/offscreen.*        Blob URL generation for large downloads
-lib/Readability.js     Bundled Mozilla Readability (Apache 2.0)
-tests/                 Extraction fixtures and test runner
-docs/                  QA, privacy policy, support docs, release checklist
-.github/workflows/     GitHub Actions CI
-```
 
-## Support and privacy
+## Develop
 
-- Privacy policy: [docs/privacy-policy.md](docs/privacy-policy.md)
-- Support: [docs/support.md](docs/support.md)
-- Release checklist: [docs/release-checklist.md](docs/release-checklist.md)
-- Chrome Web Store listing copy: [docs/chrome-web-store-listing.md](docs/chrome-web-store-listing.md)
-- Chrome Web Store pipeline: [docs/chrome-web-store-pipeline.md](docs/chrome-web-store-pipeline.md)
-
-## Develop and test
+Required: Node.js 24 or newer.
 
 ```bash
 npm ci
+npx playwright install chromium
 npm test
 ```
 
-The fixture suite uses Playwright with Chromium. If Chromium is already installed for Playwright, you can run only the fixtures with `npm run test:fixtures`.
-
-## Build for Chrome Web Store
+Useful commands:
 
 ```bash
-npm ci
-npm test
-npm run build:zip
+npm run check             # syntax-check project JavaScript
+npm run test:unit         # node:test suites
+npm run test:fixtures     # Playwright Chromium fixtures
+npm run build:zip         # deterministic Chrome Web Store ZIP
+npm run validate:package  # manifest, permissions, files, and ZIP allowlist
 ```
 
-This creates `page-to-md-pro.zip` containing only the files needed for the extension.
-Prepared store assets are available in `assets/store/`.
+The suite currently includes 33 Node tests and nine Chromium fixtures covering articles, tables, math, Shadow DOM, slots, task lists, JSON-LD, delayed mutations, large DOMs and selections, base-URL resolution, lazy/placeholder images, selection-only media, literal HTML, and unsafe protocols.
 
-## Known limitations
+## Release model
 
-- Highly interactive web apps may hide content behind virtualized rendering.
-- Custom math widgets may fall back to visible text if the page does not expose source TeX.
-- Shadow DOM components are not fully expanded.
-- Custom callout/toggle components may render as normal block content.
+A merged version change on `main` triggers the release workflow. For a version without an existing `v<version>` tag, it:
+
+1. runs the complete verification suite;
+2. builds and validates `page-to-md-pro.zip`;
+3. uploads the ZIP to the Chrome Web Store with `UPLOAD_ONLY`;
+4. creates the GitHub tag and Release only after the store upload succeeds.
+
+`UPLOAD_ONLY` does **not** submit the extension for publication. Manual workflow dispatch still supports upload-only, immediate submission, and staged submission for deliberate operator use.
+
+See [the release checklist](docs/release-checklist.md) and [pipeline documentation](docs/chrome-web-store-pipeline.md).
+
+## Privacy and permissions
+
+The extension requests only:
+
+- `activeTab` — access the current page after a user action;
+- `scripting` — inject local extraction code;
+- `downloads` — save Markdown locally;
+- `contextMenus` — expose page and selection actions;
+- `offscreen` — create Blob URLs for large downloads;
+- `storage` — save preferences in sync storage with a local fallback.
+
+It has no host permissions, static content scripts, analytics, accounts, cloud processing, or remote executable code.
+
+## Support
+
+- [Support guide](docs/support.md)
+- [Privacy policy](docs/privacy-policy.md)
+- [Chrome Web Store copy](docs/chrome-web-store-listing.md)
+- [Changelog](CHANGELOG.md)
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
-
-Bundled [Mozilla Readability](https://github.com/mozilla/readability) is licensed under Apache 2.0.
+MIT. Bundled [Mozilla Readability](https://github.com/mozilla/readability) is licensed under Apache 2.0.

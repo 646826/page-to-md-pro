@@ -1,8 +1,9 @@
 {
   "manifest_version": 3,
   "name": "Page to Markdown Pro",
-  "version": "0.1.0",
-  "description": "One-click Markdown export for the current page or selection, tuned for articles, docs, code, tables, and callouts.",
+  "version": "0.2.0",
+  "minimum_chrome_version": "109",
+  "description": "Export pages and selections to clean Markdown, with reliable support for docs, code, tables, math, task lists, and web components.",
   "permissions": [
     "activeTab",
     "contextMenus",
@@ -12,7 +13,8 @@
     "storage"
   ],
   "background": {
-    "service_worker": "src/background.js"
+    "service_worker": "src/background.js",
+    "type": "module"
   },
   "action": {
     "default_title": "Download page as Markdown"

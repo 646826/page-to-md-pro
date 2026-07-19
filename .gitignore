@@ -1,11 +1,6 @@
-.DS_Store
-Thumbs.db
 node_modules/
-*.zip
-*.crx
-*.pem
+page-to-md-pro.zip
+test-results/
+playwright-report/
+.DS_Store
 gha-creds-*.json
-.idea/
-.vscode/
-*.swp
-*~
