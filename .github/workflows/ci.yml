@@ -50,8 +50,14 @@ jobs:
       - name: Test Chrome Web Store upload-only behavior
         run: node --test tests/cws-release.test.mjs
 
-      - name: Test article, table, and math fixtures
-        run: node tests/run-fixture-tests.mjs fixture-article.html fixture-tables.html fixture-math.html
+      - name: Test article fixture
+        run: node tests/run-fixture-tests.mjs fixture-article.html
+
+      - name: Test table fixture
+        run: node tests/run-fixture-tests.mjs fixture-tables.html
+
+      - name: Test math fixture
+        run: node tests/run-fixture-tests.mjs fixture-math.html
 
       - name: Test modern, URL, and security fixtures
         run: node tests/run-fixture-tests.mjs fixture-modern-web.html fixture-base-url.html fixture-security.html
