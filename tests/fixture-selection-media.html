@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Selection Media Fixture</title>
+  <base href="https://example.test/">
+  <link rel="canonical" href="https://example.test/selection-media">
+</head>
+<body>
+  <main><article>
+    <h1>Whole page content must not be exported</h1>
+    <p>Outside selection text.</p>
+    <figure id="selected-media"><img data-src="/selected.png" alt="Selected image"></figure>
+  </article></main>
+  <script>
+    const range = document.createRange();
+    range.selectNode(document.getElementById('selected-media'));
+    const selection = document.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  </script>
+</body>
+</html>

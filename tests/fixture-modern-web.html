@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Fallback Browser Title</title>
+  <base href="https://example.test/">
+  <link rel="canonical" href="https://example.test/modern-web">
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "Structured Modern Fixture",
+      "description": "Metadata recovered from JSON-LD.",
+      "datePublished": "2026-07-18T10:00:00Z",
+      "author": {"@type": "Person", "name": "json-ld-author"}
+    }
+  </script>
+</head>
+<body>
+  <main><article class="docs-content">
+    <h1>Modern Web Fixture</h1>
+    <p>Content before the delayed mutation.</p>
+    <ul class="contains-task-list">
+      <li class="task-list-item"><input id="dynamic-task" type="checkbox" disabled> Completed task</li>
+      <li class="task-list-item"><input type="checkbox" disabled> Pending task</li>
+      <li>Parent item
+        <ul><li class="task-list-item"><input type="checkbox" checked disabled> Nested completed</li></ul>
+      </li>
+    </ul>
+    <modern-card><span slot="body">Slotted content</span><span>Unassigned hidden light content</span></modern-card>
+    <default-card><span>Default slotted content</span></default-card>
+    <outer-card></outer-card>
+    <figure><img src="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22/%3E" data-src="/assets/lazy-modern.png" alt="Lazy modern image"><figcaption>Lazy image caption.</figcaption></figure>
+    <p><img src="/assets/noscript.png" alt="Noscript image"><noscript><img src="/assets/noscript.png" alt="Noscript image fallback"></noscript></p>
+    <video controls title="Watch video"><source src="/media/demo.mp4" type="video/mp4"></video>
+    <p id="mutation-target"></p>
+  </article></main>
+  <script>
+    document.getElementById('dynamic-task').checked = true;
+    const card = document.querySelector('modern-card');
+    const shadow = card.attachShadow({ mode: 'open' });
+    shadow.innerHTML = '<section><h2>Shadow section</h2><p>Shadow body content.</p><slot name="body"></slot></section>';
+    const defaultCard = document.querySelector('default-card');
+    const defaultShadow = defaultCard.attachShadow({ mode: 'open' });
+    defaultShadow.innerHTML = '<section><slot></slot></section>';
+    const outerCard = document.querySelector('outer-card');
+    const outerShadow = outerCard.attachShadow({ mode: 'open' });
+    outerShadow.innerHTML = '<section><nested-card><span>Nested slotted content</span></nested-card></section>';
+    const nestedCard = outerShadow.querySelector('nested-card');
+    const nestedShadow = nestedCard.attachShadow({ mode: 'open' });
+    nestedShadow.innerHTML = '<div><slot></slot></div>';
+    setTimeout(() => {
+      document.getElementById('mutation-target').textContent = 'Delayed content captured after DOM settling.';
+    }, 80);
+  </script>
+</body>
+</html>

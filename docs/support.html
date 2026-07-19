@@ -3,108 +3,33 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Support information for Page to Markdown Pro.">
     <title>Support | Page to Markdown Pro</title>
-    <meta name="description" content="Support information for the Page to Markdown Pro Chrome extension.">
     <style>
-      :root {
-        color-scheme: light;
-        --bg: #f4f8f6;
-        --text: #0f172a;
-        --muted: #475569;
-        --panel: #ffffff;
-        --border: #d7e0dc;
-        --accent: #115e59;
-      }
-
-      * {
-        box-sizing: border-box;
-      }
-
-      body {
-        margin: 0;
-        font: 16px/1.6 Georgia, "Times New Roman", serif;
-        color: var(--text);
-        background:
-          radial-gradient(circle at top right, rgba(17, 94, 89, 0.10), transparent 30%),
-          linear-gradient(180deg, #fbfefc 0%, var(--bg) 100%);
-      }
-
-      main {
-        max-width: 820px;
-        margin: 0 auto;
-        padding: 40px 20px 72px;
-      }
-
-      h1,
-      h2 {
-        font-family: "Avenir Next", Avenir, "Segoe UI", sans-serif;
-        letter-spacing: -0.02em;
-        line-height: 1.15;
-      }
-
-      h1 {
-        margin: 0 0 12px;
-        font-size: clamp(2rem, 4vw, 3.2rem);
-      }
-
-      h2 {
-        margin: 26px 0 12px;
-        font-size: 1.2rem;
-      }
-
-      p {
-        margin: 0 0 14px;
-      }
-
-      ul {
-        margin: 0;
-        padding-left: 20px;
-      }
-
-      li {
-        margin-bottom: 8px;
-      }
-
-      .panel {
-        padding: 24px;
-        border-radius: 18px;
-        background: var(--panel);
-        border: 1px solid var(--border);
-      }
-
-      .muted {
-        color: var(--muted);
-      }
-
-      a {
-        color: var(--accent);
-      }
+      :root { color-scheme: light dark; font: 16px/1.65 system-ui, sans-serif; }
+      body { margin: 0; background: Canvas; color: CanvasText; }
+      main { width: min(820px, calc(100% - 32px)); margin: 0 auto; padding: 48px 0 72px; }
+      h1 { font-size: clamp(2rem, 6vw, 3.5rem); letter-spacing: -.04em; }
+      section { padding: 24px; border: 1px solid ButtonBorder; border-radius: 16px; }
+      a { color: LinkText; }
     </style>
   </head>
   <body>
     <main>
-      <p class="muted"><a href="index.html">Page to Markdown Pro</a></p>
+      <p><a href="index.html">Page to Markdown Pro</a></p>
       <h1>Support</h1>
-      <p class="muted">Use these channels if you hit a bug, extraction issue, or listing problem.</p>
-
-      <section class="panel">
-        <h2>Contact and issue reporting</h2>
+      <section>
+        <p>Report bugs, extraction regressions, and feature requests in the <a href="https://github.com/646826/page-to-md-pro/issues">GitHub issue tracker</a>.</p>
+        <h2>Include in a report</h2>
         <ul>
-          <li>Bug reports and feature requests: <a href="https://github.com/646826/page-to-md-pro/issues">github.com/646826/page-to-md-pro/issues</a></li>
-          <li>Project homepage: <a href="https://646826.github.io/page-to-md-pro/">646826.github.io/page-to-md-pro/</a></li>
-          <li>Source repository: <a href="https://github.com/646826/page-to-md-pro">github.com/646826/page-to-md-pro</a></li>
+          <li>A public page URL or a minimal HTML fixture</li>
+          <li>Browser and extension versions</li>
+          <li>Automatic, main, full-page, or selection mode</li>
+          <li>Expected Markdown and the relevant actual excerpt</li>
+          <li>Any stable service-worker or page error code</li>
+          <li>Whether the page was reloaded after the extension was updated</li>
         </ul>
-
-        <h2>What to include in a report</h2>
-        <ul>
-          <li>The page URL, if it is public.</li>
-          <li>Whether you used page mode, selection mode, or the toolbar action.</li>
-          <li>A short description of the expected Markdown versus what you received.</li>
-          <li>Any console errors from the extension service worker or the page, if available.</li>
-        </ul>
-
-        <h2>Fastest path for extraction bugs</h2>
-        <p>For extraction regressions, attaching the generated Markdown and a small HTML fixture usually makes the issue reproducible much faster.</p>
+        <p>Remove private information before attaching generated Markdown. Closed shadow roots, cross-origin frames, canvas-only content, virtualized rows not currently rendered, and content never exposed in the active DOM cannot be extracted generically.</p>
       </section>
     </main>
   </body>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Large selection fixture</title>
+</head>
+<body>
+  <main>
+    <p id="selected">Only this selected text should be exported.</p>
+    <div id="bulk" aria-hidden="true"></div>
+  </main>
+  <script>
+    const bulk = document.getElementById('bulk');
+    const fragment = document.createDocumentFragment();
+    for (let index = 0; index < 120100; index += 1) {
+      const element = document.createElement('i');
+      element.textContent = 'x';
+      fragment.appendChild(element);
+    }
+    bulk.appendChild(fragment);
+    const range = document.createRange();
+    range.selectNodeContents(document.getElementById('selected'));
+    const selection = document.getSelection();
+    selection.removeAllRanges();
+    selection.addRange(range);
+  </script>
+</body>
+</html>

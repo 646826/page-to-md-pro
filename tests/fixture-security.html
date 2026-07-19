@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Security Fixture</title>
+  <base href="https://example.test/">
+  <link rel="canonical" href="file:///private/security-fixture.html">
+</head>
+<body>
+  <main><article>
+    <h1>Security Fixture</h1>
+    <p><a href="https://safe.example/path?utm_source=test">Safe link</a></p>
+    <p><a href="javascript:alert(1)">Unsafe JavaScript link</a></p>
+    <p><a href="vbscript:msgbox(1)">Unsafe VBScript link</a></p>
+    <p><a href="data:text/html,&lt;script&gt;alert(1)&lt;/script&gt;">Unsafe data link</a></p>
+    <p>Literal HTML payload: &lt;img src=x onerror=alert(9)&gt;</p>
+    <p>Literal fence payload: ~~~</p>
+    <table>
+      <tr><th>Safe column</th></tr>
+      <tr><td><script>TABLE_SCRIPT_PAYLOAD</script><button>TABLE_BUTTON_LABEL</button>Safe table value</td></tr>
+    </table>
+    <table>
+      <tr><th colspan="2" onclick="alert(1)">Complex table</th></tr>
+      <tr><td background="javascript:alert(9)"><a href="javascript:alert(2)" onclick="alert(3)">Unsafe table link</a></td><td><img alt="Safe fallback image" srcset="javascript:alert(4) 1x, https://safe.example/image.png 2x">Value</td></tr>
+      <tr><td colspan="2"><svg><animate attributeName="href" values="javascript:alert(5)"></animate><foreignObject><div>SVG_FOREIGN_OBJECT</div></foreignObject></svg>Safe after SVG</td></tr>
+      <tr><td colspan="2"><evil-widget is="unsafe-upgrade" autofocus>CUSTOM_WIDGET_TEXT</evil-widget></td></tr>
+    </table>
+    <script>window.__mustNeverAppear = '<script';</script>
+  </article></main>
+</body>
+</html>

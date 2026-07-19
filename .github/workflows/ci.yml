@@ -2,27 +2,99 @@ name: CI
 
 on:
   push:
+    branches: [main]
   pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    timeout-minutes: 20
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v6
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
 
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browser and OS dependencies
+      - name: Install Playwright Chromium and OS dependencies
         run: npx playwright install --with-deps chromium
 
-      - name: Run fixture tests
-        run: npm run test:fixtures
+      - name: Run syntax and control-byte checks
+        run: npm run check
+
+      - name: Test shared utilities
+        run: node --test tests/shared.test.mjs
+
+      - name: Test storage fallback
+        run: node --test tests/storage.test.mjs
+
+      - name: Test background orchestration
+        run: node --test tests/background.test.mjs
+
+      - name: Test offscreen lifecycle
+        run: node --test tests/offscreen.test.mjs
+
+      - name: Test package metadata
+        run: node --test tests/package.test.mjs
+
+      - name: Test deterministic build
+        run: node --test tests/build.test.mjs
+
+      - name: Test Chrome Web Store upload-only behavior
+        run: node --test tests/cws-release.test.mjs
+
+      - name: Test article fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-article.html
+
+      - name: Test table fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-tables.html
+
+      - name: Test math fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-math.html
+
+      - name: Test modern-web fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-modern-web.html
+
+      - name: Test base-URL fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-base-url.html
+
+      - name: Test security fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-security.html
+
+      - name: Test selection-media fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-selection-media.html
+
+      - name: Test large-DOM fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-large-dom.html
+
+      - name: Test over-budget selection fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-large-selection.html
+
+      - name: Run aggregate release verification entry point
+        run: npm test
+
+      - name: Validate source package
+        run: npm run validate:package
+
+      - name: Build Chrome Web Store package
+        run: npm run build:zip
+
+      - name: Validate release package allowlist
+        run: npm run validate:package
+
+      - name: Upload verified package
+        uses: actions/upload-artifact@v7
+        with:
+          name: page-to-md-pro-${{ github.sha }}
+          path: page-to-md-pro.zip
+          if-no-files-found: error
+          retention-days: 14

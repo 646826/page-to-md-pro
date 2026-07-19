@@ -1,8 +1,9 @@
 {
   "name": "page-to-md-pro",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "private": true,
-  "description": "One-click Chrome extension that exports the current page or selection as Markdown.",
+  "description": "Local-first Chromium extension that exports pages and selections as high-fidelity Markdown.",
+  "type": "module",
   "author": "646826",
   "license": "MIT",
   "homepage": "https://646826.github.io/page-to-md-pro/",
@@ -13,12 +14,19 @@
   "bugs": {
     "url": "https://github.com/646826/page-to-md-pro/issues"
   },
+  "engines": {
+    "node": ">=24.0.0"
+  },
+  "packageManager": "npm@11.17.0",
   "scripts": {
-    "test": "npx playwright install chromium && npm run test:fixtures",
+    "check": "node scripts/check-syntax.mjs",
+    "test:unit": "node --test tests/*.test.mjs",
     "test:fixtures": "node tests/run-fixture-tests.mjs",
+    "validate:package": "node scripts/validate-package.mjs",
+    "test": "npm run check && npm run test:unit && npm run test:fixtures && npm run validate:package",
     "build:zip": "bash scripts/build-zip.sh"
   },
   "devDependencies": {
-    "playwright": "^1.50.0"
+    "playwright": "1.61.1"
   }
 }

@@ -1,41 +1,25 @@
-# Privacy Policy
+# Privacy Policy for Page to Markdown Pro
 
-Last updated: March 8, 2026
+Last updated: 2026-07-19
 
-Page to Markdown Pro processes page content locally in your browser when you explicitly use the extension.
+Page to Markdown Pro processes the active page or current selection only after the user invokes the toolbar action, keyboard shortcut, or context-menu command.
 
-## What the extension does
+## Data processing
 
-- Reads the active page or highlighted selection only after you click the toolbar button, use a keyboard shortcut, or choose a context-menu action.
-- Converts that content into Markdown locally on-device.
-- Saves your preferences using Chrome storage sync.
-- Saves the generated Markdown file locally through Chrome's downloads API.
+Page content, selections, metadata, and generated Markdown are processed locally in the browser. They are not sent to developer-controlled servers.
 
-## What the extension does not do
+## Storage
 
-- It does not send page content, selections, generated Markdown, or browsing data to our servers.
-- It does not use remote code, analytics beacons, or third-party tracking scripts.
-- It does not require an account or user sign-in.
+The extension stores only user preferences. It normally uses Chrome sync storage and falls back to local extension storage when sync storage is unavailable. It does not store captured page content or generated Markdown in extension storage.
 
-## Data handling summary
+## Network and analytics
 
-- Page content and selections are processed transiently in the browser to generate the Markdown output you requested.
-- Settings such as export preferences may be stored in `chrome.storage.sync`, which is managed by Chrome under your browser account settings.
-- Generated files are downloaded to your device and are not uploaded by the extension.
+The extension contains no telemetry, analytics, advertising, accounts, cloud processing, or remote executable code. Downloaded Markdown may contain links to resources already referenced by the source page; the extension does not fetch those resources while generating the file.
 
-## Permissions explained
+## Permissions
 
-- `activeTab`: temporarily access the current page after an explicit user action.
-- `scripting`: inject the local extraction scripts into the active page.
-- `downloads`: save the generated Markdown file.
-- `contextMenus`: offer export actions from the page and selection context menus.
-- `offscreen`: create Blob URLs for large downloads.
-- `storage`: save user preferences.
+The extension uses `activeTab`, `scripting`, `downloads`, `contextMenus`, `offscreen`, and `storage` solely for its page-to-Markdown export function. It requests no host permissions.
 
 ## Contact
 
-For privacy questions or requests, use the support information in [support.md](support.md).
-
-## Chrome Web Store user data policy
-
-The use of information collected from web pages through this extension is limited to providing the user-facing export feature described in the Chrome Web Store listing and the extension UI. The extension does not use this information for advertising, profiling, or sale to third parties.
+Report privacy questions through the repository issue tracker: <https://github.com/646826/page-to-md-pro/issues>
