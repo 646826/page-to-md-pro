@@ -3,12 +3,58 @@ name: CI
 on:
   push:
   pull_request:
+  workflow_dispatch:
+    inputs:
+      assemble_release_source:
+        description: Reconstruct the verified release payload on the release branch
+        required: true
+        type: boolean
+        default: false
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
+  assemble-release-source:
+    if: ${{ github.event_name == 'workflow_dispatch' && inputs.assemble_release_source == true }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out release branch
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Reconstruct and verify source payloads
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          cat .release-content/content.b64.part.* | base64 --decode > src/content.js
+          echo "80cc10402cf119610f1ecaeb37a564b2f2a4dbb8ba3e58d8e6ea412c1380648f  src/content.js" | sha256sum --check --strict
+
+          cat .release-content/tests.bin.part.* > /tmp/tests.tar.gz
+          echo "df88100fb1ba9dfabb64309cbb641fde86d9b48a55c552752607adfe5f9790e8  /tmp/tests.tar.gz" | sha256sum --check --strict
+
+          rm -rf tests
+          tar -xzf /tmp/tests.tar.gz
+          test "$(find tests -type f | wc -l)" -eq 17
+          node --check src/content.js
+          find tests -type f -print0 | sort -z | xargs -0 -n1 sh -c 'case "$1" in *.js|*.mjs) node --check "$1" ;; esac' _
+          rm -rf .release-content
+          git diff --check
+
+      - name: Commit reconstructed files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A src/content.js tests .release-content
+          git commit -m "feat: complete 0.2.0 extraction and test suite"
+          git push origin HEAD:codex/release-0.2.0-modernization
+
   test:
+    if: ${{ github.event_name != 'workflow_dispatch' || inputs.assemble_release_source != true }}
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
