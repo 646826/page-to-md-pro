@@ -8,11 +8,14 @@ trap 'rm -rf "${STAGE}"' EXIT
 export TZ=UTC
 
 FILES=(
+  LICENSE
+  THIRD_PARTY_NOTICES.md
   assets/icon128.png
   assets/icon16.png
   assets/icon32.png
   assets/icon48.png
   lib/Readability.js
+  licenses/Apache-2.0.txt
   manifest.json
   src/background.js
   src/content.js
