@@ -751,7 +751,7 @@
         node.remove();
       }
     }
-    for (const node of root.querySelectorAll('hidden], [aria-hidden="true"]')) {
+    for (const node of root.querySelectorAll('[hidden], [aria-hidden="true"]')) {
       if (node.hasAttribute('data-p2m-math') || node.closest('[data-p2m-math], pre, code')) continue;
       node.remove();
     }
