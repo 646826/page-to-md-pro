@@ -720,7 +720,7 @@
       if (dataUrl) {
         while (index < input.length && !/\s/.test(input[index])) index += 1;
       } else {
-        while (index < input.length && !/[\s,]/.test(input[index])) index = 1;
+        while (index < input.length && !/[\s,]/.test(input[index])) index += 1;
       }
       const url = input.slice(start, index);
       while (/\s/.test(input[index] || '')) index += 1;
