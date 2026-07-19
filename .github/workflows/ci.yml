@@ -79,6 +79,9 @@ jobs:
       - name: Test over-budget selection fixture
         run: timeout 120s node tests/run-fixture-tests.mjs fixture-large-selection.html
 
+      - name: Run aggregate release verification entry point
+        run: npm test
+
       - name: Validate source package
         run: npm run validate:package
 
