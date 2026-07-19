@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Large DOM Fixture</title>
+  <base href="https://example.test/">
+</head>
+<body>
+  <main><article>
+    <h1>Large DOM Fixture</h1>
+    <p>Large DOM fixture remains extractable.</p>
+  </article></main>
+  <div id="noise" hidden></div>
+  <script>
+    const fragment = document.createDocumentFragment();
+    for (let index = 0; index < 20100; index += 1) {
+      const span = document.createElement('span');
+      span.textContent = '';
+      fragment.appendChild(span);
+    }
+    document.getElementById('noise').appendChild(fragment);
+  </script>
+</body>
+</html>
