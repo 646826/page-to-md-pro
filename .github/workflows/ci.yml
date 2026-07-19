@@ -5,66 +5,15 @@ on:
   pull_request:
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   test:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - name: Check out repository
         uses: actions/checkout@v6
-        with:
-          ref: ${{ github.event_name == 'pull_request' && github.head_ref || github.ref }}
-          fetch-depth: 0
-
-      - name: Repair verified selector-byte corruption
-        id: repair
-        shell: bash
-        run: |
-          set -euo pipefail
-          python3 - <<'PY'
-          from pathlib import Path
-
-          path = Path('src/content.js')
-          source = path.read_bytes()
-          corrupted = b"\x1bhidden]"
-          repaired = b"[hidden]"
-          count = source.count(corrupted)
-          if count > 1:
-              raise SystemExit(f'Expected at most one corrupted selector, found {count}.')
-          if count == 1:
-              source = source.replace(corrupted, repaired)
-              path.write_bytes(source)
-              print('Repaired ESC-prefixed hidden selector in src/content.js.')
-          elif repaired not in source:
-              raise SystemExit('Neither the corrupted nor repaired hidden selector is present.')
-
-          disallowed = [
-              (index, byte)
-              for index, byte in enumerate(source)
-              if byte < 32 and byte not in (9, 10, 13)
-          ]
-          if disallowed:
-              preview = ', '.join(f'offset={index} byte=0x{byte:02X}' for index, byte in disallowed[:10])
-              raise SystemExit(f'Disallowed control bytes remain in src/content.js: {preview}')
-          PY
-          git diff --check
-          if git diff --quiet -- src/content.js; then
-            echo "changed=false" >> "${GITHUB_OUTPUT}"
-          else
-            echo "changed=true" >> "${GITHUB_OUTPUT}"
-          fi
-
-      - name: Commit repaired source
-        if: ${{ github.event_name == 'push' && steps.repair.outputs.changed == 'true' }}
-        shell: bash
-        run: |
-          set -euo pipefail
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/content.js
-          git commit -m "fix(extraction): restore the hidden-element selector"
-          git push origin HEAD:"${GITHUB_REF_NAME}"
 
       - name: Set up Node.js 24
         uses: actions/setup-node@v6
@@ -78,7 +27,7 @@ jobs:
       - name: Install Playwright Chromium and OS dependencies
         run: npx playwright install --with-deps chromium
 
-      - name: Run syntax checks
+      - name: Run syntax and control-byte checks
         run: npm run check
 
       - name: Test shared utilities
@@ -103,37 +52,31 @@ jobs:
         run: node --test tests/cws-release.test.mjs
 
       - name: Test article fixture
-        shell: bash
-        run: |
-          set -o pipefail
-          node tests/run-fixture-tests.mjs fixture-article.html 2>&1 | tee article-fixture.log
-
-      - name: Upload article fixture diagnostics
-        if: ${{ always() }}
-        uses: actions/upload-artifact@v7
-        with:
-          name: article-fixture-diagnostics-${{ github.sha }}
-          path: article-fixture.log
-          if-no-files-found: error
-          retention-days: 7
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-article.html
 
       - name: Test table fixture
-        run: node tests/run-fixture-tests.mjs fixture-tables.html
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-tables.html
 
       - name: Test math fixture
-        run: node tests/run-fixture-tests.mjs fixture-math.html
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-math.html
 
-      - name: Test modern, URL, and security fixtures
-        run: node tests/run-fixture-tests.mjs fixture-modern-web.html fixture-base-url.html fixture-security.html
+      - name: Test modern-web fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-modern-web.html
+
+      - name: Test base-URL fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-base-url.html
+
+      - name: Test security fixture
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-security.html
 
       - name: Test selection-media fixture
-        run: node tests/run-fixture-tests.mjs fixture-selection-media.html
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-selection-media.html
 
       - name: Test large-DOM fixture
-        run: node tests/run-fixture-tests.mjs fixture-large-dom.html
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-large-dom.html
 
       - name: Test over-budget selection fixture
-        run: node tests/run-fixture-tests.mjs fixture-large-selection.html
+        run: timeout 120s node tests/run-fixture-tests.mjs fixture-large-selection.html
 
       - name: Validate source package
         run: npm run validate:package
