@@ -67,7 +67,19 @@ jobs:
         run: timeout 120s node tests/run-fixture-tests.mjs fixture-base-url.html
 
       - name: Test security fixture
-        run: timeout 120s node tests/run-fixture-tests.mjs fixture-security.html
+        shell: bash
+        run: |
+          set -o pipefail
+          timeout 120s node tests/run-fixture-tests.mjs fixture-security.html 2>&1 | tee security-fixture.log
+
+      - name: Upload security fixture diagnostics
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: security-fixture-diagnostics-${{ github.sha }}
+          path: security-fixture.log
+          if-no-files-found: error
+          retention-days: 7
 
       - name: Test selection-media fixture
         run: timeout 120s node tests/run-fixture-tests.mjs fixture-selection-media.html
