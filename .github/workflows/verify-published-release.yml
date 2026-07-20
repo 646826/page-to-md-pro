@@ -6,7 +6,6 @@ on:
       - .github/workflows/verify-published-release.yml
       - scripts/verify-published-release.mjs
       - tests/published-release.test.mjs
-      - manifest.json
   release:
     types: [published]
   workflow_dispatch:
