@@ -1,0 +1,50 @@
+name: Verify Published Release
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/verify-published-release.yml
+      - scripts/verify-published-release.mjs
+      - tests/published-release.test.mjs
+      - manifest.json
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Release tag to verify; defaults to the manifest version
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag || '' }}
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Test release verifier
+        run: node --test tests/published-release.test.mjs
+
+      - name: Verify published release and Chrome Web Store evidence
+        run: node scripts/verify-published-release.mjs
+
+      - name: Upload verification report
+        uses: actions/upload-artifact@v7
+        with:
+          name: published-release-verification-${{ github.sha }}
+          path: published-release-verification.json
+          if-no-files-found: error
+          retention-days: 30
