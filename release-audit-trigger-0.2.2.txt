@@ -1,1 +1,0 @@
-Trigger the existing CI audit job to verify the published v0.2.2 GitHub Release assets and Chrome Web Store UPLOAD_ONLY evidence.
