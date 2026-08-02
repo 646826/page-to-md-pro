@@ -9,6 +9,10 @@ All notable changes to Page to Markdown Pro are documented here.
 - Browser regression coverage for HTML line breaks and code blocks nested in inline/custom-element flow.
 - Dedicated CI execution for the published-release verifier and the new rendering-regression fixture.
 
+### Changed
+
+- Made the published-release test fixture derive its version and tag from `manifest.json`, so future version bumps do not invalidate the verifier test.
+
 ### Fixed
 
 - Restored valid `<br>` Markdown output instead of emitting the malformed `<br-` fragment.
