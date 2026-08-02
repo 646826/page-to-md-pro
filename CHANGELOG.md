@@ -2,6 +2,18 @@
 
 All notable changes to Page to Markdown Pro are documented here.
 
+## [0.2.3] - 2026-08-02
+
+### Added
+
+- Node regression coverage for delayed Chrome download IDs and Blob downloads that never reach a terminal state.
+
+### Fixed
+
+- Started the large-download terminal-state timeout only after Chrome returns a valid download ID, so time spent in the save dialog no longer consumes the transfer timeout.
+- Rejected stalled Blob downloads with stable code `DOWNLOAD_TIMEOUT` instead of reporting unconfirmed completion as success.
+- Preserved deterministic listener and Blob URL cleanup after completion, interruption, start failure, and timeout.
+
 ## [0.2.2] - 2026-08-02
 
 ### Added
