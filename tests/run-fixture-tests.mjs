@@ -24,6 +24,18 @@ const fixtures = [
     expectedObserverCount: 2
   },
   {
+    file: 'fixture-rendering-regressions.html', mode: 'full',
+    options: { includeFrontMatter: false, includeSourceLink: false },
+    checks: [
+      'First line<br>\nSecond line',
+      '```javascript\nconst nested = true;\n```'
+    ],
+    rejects: [
+      '<br-',
+      'l\n```javascript\nconst nested = true;'
+    ]
+  },
+  {
     file: 'fixture-tables.html', mode: 'main', options: { includeFrontMatter: false, includeSourceLink: false },
     checks: ['| Name | Value |', '| Alpha | 42 |', '| Metric | Reading |\n| --- | --- |\n| Gamma | 7 |', '![A](https://example.test/a.png)', '[Click here](https://example.test/cta)']
   },

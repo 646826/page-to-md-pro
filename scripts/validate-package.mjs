@@ -32,7 +32,7 @@ const [manifest, pkg, lock] = await Promise.all([
 
 assert(manifest.manifest_version === 3, 'manifest_version must be 3');
 assert(typeof manifest.description === 'string' && manifest.description.length <= 132, 'manifest description must be 132 characters or fewer');
-assert(manifest.version === '0.2.0', 'manifest version must be 0.2.0');
+assert(isValidChromeVersion(manifest.version), 'manifest version must follow Chrome extension version rules');
 assert(pkg.version === manifest.version, 'package and manifest versions must match');
 assert(lock.version === manifest.version && lock.packages?.['']?.version === manifest.version, 'lockfile version metadata must match');
 assert(manifest.background?.type === 'module', 'background service worker must be a module');
@@ -65,6 +65,13 @@ try {
 }
 
 console.log(`Package validation passed for version ${manifest.version} (${packagedFiles.length} packaged files).`);
+
+function isValidChromeVersion(version) {
+  if (typeof version !== 'string') return false;
+  const parts = version.split('.');
+  if (parts.length < 1 || parts.length > 4 || parts.every((part) => part === '0')) return false;
+  return parts.every((part) => /^(?:0|[1-9]\d*)$/.test(part) && Number(part) <= 65535);
+}
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);

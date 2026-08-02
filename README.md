@@ -2,7 +2,7 @@
 
 Page to Markdown Pro is a local-first Chromium extension that exports the active page or highlighted selection as a clean Markdown file.
 
-Version **0.2.0** focuses on generic reliability: bounded extraction, safer downloads, modern component support, stronger URL sanitization, deterministic packaging, and broader automated coverage without adding host permissions, telemetry, or remote code.
+Version **0.2.1** is a focused reliability patch that restores valid HTML line-break Markdown and removes a stray character before nested code blocks, with browser-level regression coverage and no new host permissions, telemetry, remote code, or runtime dependencies.
 
 ## Highlights
 
@@ -85,7 +85,7 @@ npm run build:zip         # deterministic Chrome Web Store ZIP
 npm run validate:package  # manifest, permissions, files, and ZIP allowlist
 ```
 
-The suite currently includes 33 Node tests and nine Chromium fixtures covering articles, tables, math, Shadow DOM, slots, task lists, JSON-LD, delayed mutations, large DOMs and selections, base-URL resolution, lazy/placeholder images, selection-only media, literal HTML, and unsafe protocols.
+The suite currently includes 36 Node tests and ten Chromium fixtures covering articles, tables, math, HTML line breaks, nested inline-flow code blocks, Shadow DOM, slots, task lists, JSON-LD, delayed mutations, large DOMs and selections, base-URL resolution, lazy/placeholder images, selection-only media, literal HTML, unsafe protocols, deterministic packaging, and published-release evidence.
 
 ## Release model
 
