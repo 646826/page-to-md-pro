@@ -107,3 +107,28 @@ jobs:
           path: page-to-md-pro.zip
           if-no-files-found: error
           retention-days: 14
+
+  fix_nested_list_indent:
+    if: ${{ github.event_name == 'pull_request' && github.head_ref == 'codex/0.2.2-list-fidelity' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/0.2.2-list-fidelity
+          fetch-depth: 0
+
+      - name: Apply and push the focused correction
+        shell: bash
+        run: |
+          python scripts/temporary-trim-end-fix.py
+          git diff --check
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm scripts/temporary-trim-end-fix.py
+          git add src/content.js
+          git commit -m "fix: preserve nested list indentation"
+          git push origin HEAD:codex/0.2.2-list-fidelity
