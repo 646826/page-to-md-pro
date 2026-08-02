@@ -7,14 +7,16 @@ import { spawnSync } from 'node:child_process';
 import { mkdtemp, mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 import os from 'node:os';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import {
   RELEASE_RUNTIME_FILES,
   verifyPublishedRelease
 } from '../scripts/verify-published-release.mjs';
 
 const REPOSITORY = 'test-owner/test-repo';
-const TAG = 'v0.2.0';
-const VERSION = '0.2.0';
+const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+const VERSION = JSON.parse(await readFile(path.join(ROOT, 'manifest.json'), 'utf8')).version;
+const TAG = `v${VERSION}`;
 const COMMIT = '0123456789abcdef0123456789abcdef01234567';
 
 async function createReleaseFixture(t, evidenceOverrides = {}) {
@@ -69,7 +71,7 @@ async function createReleaseFixture(t, evidenceOverrides = {}) {
       response.setHeader('content-type', 'application/json');
       response.end(JSON.stringify({
         tag_name: TAG,
-        name: 'Page to Markdown Pro 0.2.0',
+        name: `Page to Markdown Pro ${VERSION}`,
         draft: false,
         prerelease: false,
         target_commitish: COMMIT,
