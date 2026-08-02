@@ -1,0 +1,168 @@
+name: Temporary release preparation
+
+on:
+  push:
+    branches:
+      - codex/0.2.1-rendering-regressions
+    paths:
+      - .github/workflows/temporary-release-prep.yml
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/0.2.1-rendering-regressions
+          fetch-depth: 0
+
+      - name: Prepare version 0.2.1
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          def read(path):
+              return Path(path).read_text(encoding='utf-8')
+
+          def write(path, text):
+              Path(path).write_text(text, encoding='utf-8')
+
+          def replace_once(path, old, new):
+              text = read(path)
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'{path}: expected one occurrence, found {count}: {old!r}')
+              write(path, text.replace(old, new))
+
+          def replace_count(path, old, new, expected):
+              text = read(path)
+              count = text.count(old)
+              if count != expected:
+                  raise SystemExit(f'{path}: expected {expected} occurrences, found {count}: {old!r}')
+              write(path, text.replace(old, new))
+
+          replace_once('manifest.json', '"version": "0.2.0"', '"version": "0.2.1"')
+          replace_once('package.json', '"version": "0.2.0"', '"version": "0.2.1"')
+          replace_count('package-lock.json', '"version": "0.2.0"', '"version": "0.2.1"', 2)
+          replace_count('tests/package.test.mjs', '0.2.0', '0.2.1', 3)
+
+          replace_once(
+              '.github/workflows/ci.yml',
+              """      - name: Test Chrome Web Store upload-only behavior
+                run: node --test tests/cws-release.test.mjs
+
+              - name: Test article fixture
+""",
+              """      - name: Test Chrome Web Store upload-only behavior
+                run: node --test tests/cws-release.test.mjs
+
+              - name: Test published release verifier
+                run: node --test tests/published-release.test.mjs
+
+              - name: Test article fixture
+"""
+          )
+
+          replace_once(
+              'tests/package.test.mjs',
+              r"""  assert.match(ci, /actions\/upload-artifact@v7/);
+            assert.match(release, /actions\/upload-artifact@v7/);
+""",
+              r"""  assert.match(ci, /actions\/upload-artifact@v7/);
+            assert.match(ci, /node --test tests\/published-release\.test\.mjs/);
+            assert.match(ci, /fixture-rendering-regressions\.html/);
+            assert.match(release, /actions\/upload-artifact@v7/);
+"""
+          )
+
+          replace_once(
+              'README.md',
+              'Version **0.2.0** focuses on generic reliability: bounded extraction, safer downloads, modern component support, stronger URL sanitization, deterministic packaging, and broader automated coverage without adding host permissions, telemetry, or remote code.',
+              'Version **0.2.1** is a focused reliability patch that restores valid HTML line-break Markdown and removes a stray character before nested code blocks, with browser-level regression coverage and no new host permissions, telemetry, remote code, or runtime dependencies.'
+          )
+          replace_once(
+              'README.md',
+              'The suite currently includes 33 Node tests and nine Chromium fixtures covering articles, tables, math, Shadow DOM, slots, task lists, JSON-LD, delayed mutations, large DOMs and selections, base-URL resolution, lazy/placeholder images, selection-only media, literal HTML, and unsafe protocols.',
+              'The suite currently includes 36 Node tests and ten Chromium fixtures covering articles, tables, math, HTML line breaks, nested inline-flow code blocks, Shadow DOM, slots, task lists, JSON-LD, delayed mutations, large DOMs and selections, base-URL resolution, lazy/placeholder images, selection-only media, literal HTML, unsafe protocols, deterministic packaging, and published-release evidence.'
+          )
+
+          changelog_entry = """## [0.2.1] - 2026-08-02
+
+          ### Added
+
+          - Browser regression coverage for HTML line breaks and code blocks nested in inline/custom-element flow.
+          - Dedicated CI execution for the published-release verifier and the new rendering-regression fixture.
+
+          ### Fixed
+
+          - Restored valid `<br>` Markdown output instead of emitting the malformed `<br-` fragment.
+          - Removed a stray `l` character before code blocks encountered in inline flow.
+
+          """
+          replace_once(
+              'CHANGELOG.md',
+              '# Changelog\n\nAll notable changes to Page to Markdown Pro are documented here.\n\n',
+              '# Changelog\n\nAll notable changes to Page to Markdown Pro are documented here.\n\n' + changelog_entry
+          )
+
+          release_notes = """# Page to Markdown Pro 0.2.1
+
+          Released on 2026-08-02.
+
+          ## What changed
+
+          - HTML `<br>` elements now render as valid `<br>` Markdown followed by a newline.
+          - Code-block containers reached through inline or custom-element flow no longer receive a stray `l` prefix.
+          - A real Chromium regression fixture exercises both paths and runs as a focused CI step as well as part of the aggregate suite.
+          - The existing published-release verifier now has its own focused CI step for clearer failures.
+
+          ## Compatibility and security
+
+          - No extension permissions, host permissions, runtime dependencies, telemetry, or remote executable code were added.
+          - The minimum supported Chrome version remains 109.
+          - Automated delivery remains `UPLOAD_ONLY`: the package is uploaded to Chrome Web Store but is not submitted for publication automatically.
+
+          ## Verification gates
+
+          The release candidate must pass all 36 Node tests, all ten Chromium fixtures, `npm test`, deterministic ZIP construction, and exact release-package allowlist validation before merge. The main-branch release workflow repeats the full verification before store upload and GitHub Release creation.
+          """
+          release_path = Path('docs/releases/0.2.1.md')
+          if release_path.exists():
+              raise SystemExit(f'{release_path} already exists')
+          release_path.parent.mkdir(parents=True, exist_ok=True)
+          release_path.write_text(release_notes, encoding='utf-8')
+
+          replace_once(
+              'docs/superpowers/specs/2026-08-02-page-to-md-pro-0.2.1-rendering-regressions-design.md',
+              '2. A custom inline element with class `highlight` containing a JavaScript `<code>` element. This forces the renderer\'s inline code-block-container branch without relying on invalid paragraph nesting.',
+              '2. A custom inline element with class `highlight`, nested inside a regular `<span>`, containing a JavaScript `<code>` element. The extra inline wrapper forces the renderer\'s inline code-block-container branch without relying on invalid paragraph nesting.'
+          )
+          replace_once(
+              'docs/superpowers/plans/2026-08-02-page-to-md-pro-0.2.1-rendering-regressions.md',
+              '      <div>Before code <p2m-code class="highlight"><code class="language-js">const nested = true;</code></p2m-code> After code</div>',
+              '      <div><span>Before code <p2m-code class="highlight"><code class="language-js">const nested = true;</code></p2m-code> After code</span></div>'
+          )
+          replace_once(
+              'docs/superpowers/plans/2026-08-02-page-to-md-pro-0.2.1-rendering-regressions.md',
+              "  mode: 'main',",
+              "  mode: 'full',"
+          )
+          PY
+          git diff --check
+          git diff --stat
+
+      - name: Commit and push release preparation
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add manifest.json package.json package-lock.json tests/package.test.mjs \
+            .github/workflows/ci.yml README.md CHANGELOG.md docs/releases/0.2.1.md \
+            docs/superpowers/specs/2026-08-02-page-to-md-pro-0.2.1-rendering-regressions-design.md \
+            docs/superpowers/plans/2026-08-02-page-to-md-pro-0.2.1-rendering-regressions.md
+          git commit -m "chore: prepare release 0.2.1"
+          git push origin HEAD:codex/0.2.1-rendering-regressions
