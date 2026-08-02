@@ -1,9 +1,0 @@
-{
-  "schemaVersion": 1,
-  "tag": "v0.2.1",
-  "commit": "1058c75002d8b715385908280144f05ce2fcfa71",
-  "exitCode": 0,
-  "stdout": "{\n  \"schemaVersion\": 1,\n  \"verifiedAt\": \"2026-08-02T03:51:30.940Z\",\n  \"repository\": \"646826/page-to-md-pro\",\n  \"tag\": \"v0.2.1\",\n  \"version\": \"0.2.1\",\n  \"commit\": \"daa906179e4536204f121415780725b6be5e81bd\",\n  \"release\": {\n    \"name\": \"Page to Markdown Pro 0.2.1\",\n    \"url\": \"https://github.com/646826/page-to-md-pro/releases/tag/v0.2.1\",\n    \"publishedAt\": \"2026-08-02T03:48:17Z\",\n    \"draft\": false,\n    \"prerelease\": false,\n    \"targetCommitish\": \"daa906179e4536204f121415780725b6be5e81bd\",\n    \"assets\": [\n      \"page-to-md-pro.zip\",\n      \"release-evidence.json\"\n    ]\n  },\n  \"chromeWebStoreUpload\": \"SUCCEEDED\",\n  \"publishSubmission\": \"SKIPPED\",\n  \"publishType\": \"UPLOAD_ONLY\",\n  \"skipReview\": false,\n  \"evidenceVerifiedAt\": \"2026-08-02T03:48:12.290Z\",\n  \"verifiedLogMarkers\": [\n    \"Upload finished successfully.\",\n    \"Skipping publish step.\"\n  ],\n  \"zip\": {\n    \"sha256\": \"4464ea2d861e568e7fb0ca05f220b0251362dc83babf3619fa8217e539c90236\",\n    \"bytes\": 59548,\n    \"entryCount\": 18,\n    \"entries\": [\n      \"LICENSE\",\n      \"THIRD_PARTY_NOTICES.md\",\n      \"assets/icon128.png\",\n      \"assets/icon16.png\",\n      \"assets/icon32.png\",\n      \"assets/icon48.png\",\n      \"lib/Readability.js\",\n      \"licenses/Apache-2.0.txt\",\n      \"manifest.json\",\n      \"src/background.js\",\n      \"src/content.js\",\n      \"src/offscreen.html\",\n      \"src/offscreen.js\",\n      \"src/options.css\",\n      \"src/options.html\",\n      \"src/options.js\",\n      \"src/shared.js\",\n      \"src/storage.js\"\n    ],\n    \"manifestVersion\": \"0.2.1\"\n  }\n}\n",
-  "stderr": "",
-  "recordedAt": "2026-08-02T03:51:30.974Z"
-}
