@@ -1,0 +1,53 @@
+name: Temporary renderer fix
+
+on:
+  push:
+    branches:
+      - codex/0.2.1-rendering-regressions
+    paths:
+      - .github/workflows/temporary-renderer-fix.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out feature branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/0.2.1-rendering-regressions
+          fetch-depth: 0
+
+      - name: Apply exact renderer corrections
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('src/content.js')
+          text = path.read_text(encoding='utf-8')
+          replacements = {
+              "if (isCodeBlockContainer(node)) return `\\l\\n${renderCodeBlock(node)}\\n\\n`;":
+                  "if (isCodeBlockContainer(node)) return `\\n\\n${renderCodeBlock(node)}\\n\\n`;",
+              "case 'BR': return '<br-\\n';":
+                  "case 'BR': return '<br>\\n';",
+          }
+          for old, new in replacements.items():
+              count = text.count(old)
+              if count != 1:
+                  raise SystemExit(f'Expected exactly one occurrence, found {count}: {old!r}')
+              text = text.replace(old, new)
+          path.write_text(text, encoding='utf-8')
+          PY
+          git diff --check
+          git diff -- src/content.js
+
+      - name: Commit and push renderer fix
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add src/content.js
+          git commit -m "fix: restore markdown line break rendering"
+          git push origin HEAD:codex/0.2.1-rendering-regressions
