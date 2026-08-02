@@ -184,7 +184,7 @@ test('starts the Blob download timeout only after Chrome returns a download ID',
   };
   const controller = createBackgroundController(harness.chrome, {
     dataUrlThreshold: 10,
-    downloadTimeoutMs: 15
+    downloadTimeoutMs: 100
   });
 
   let settled = false;
@@ -194,7 +194,7 @@ test('starts the Blob download timeout only after Chrome returns a download ID',
     () => { settled = true; }
   );
 
-  await new Promise((resolve) => setTimeout(resolve, 40));
+  await new Promise((resolve) => setTimeout(resolve, 150));
   assert.equal(settled, false, 'waiting for Chrome to return a download ID must not consume the terminal-state timeout');
 
   downloadStart.resolve(7);
@@ -210,7 +210,7 @@ test('rejects and cleans up when a Blob download never reaches a terminal state'
   const harness = createChromeHarness();
   const controller = createBackgroundController(harness.chrome, {
     dataUrlThreshold: 10,
-    downloadTimeoutMs: 20
+    downloadTimeoutMs: 30
   });
 
   const pending = controller.downloadMarkdown('x'.repeat(100), 'stalled.md', false);
