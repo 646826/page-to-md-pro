@@ -1,13 +1,18 @@
 name: Temporary 0.2.2 branch patch
 
 on:
-  pull_request:
+  push:
     branches: [main]
     paths:
-      - automation-trigger-main-0.2.2.txt
+      - .github/workflows/temporary-0.2.2-branch-patch.yml
+      - automation-trigger-main-push-0.2.2.txt
 
 permissions:
   contents: write
+
+concurrency:
+  group: temporary-0.2.2-branch-patch
+  cancel-in-progress: false
 
 jobs:
   patch:
@@ -119,30 +124,43 @@ jobs:
             return Number.isSafeInteger(parsed) ? parsed : fallback;
           }
 '''
-          count = text.count(old)
-          if count != 1:
-              raise SystemExit(f'Expected exactly one list renderer block, found {count}')
-          path.write_text(text.replace(old, new), encoding='utf-8')
+          if old in text:
+              path.write_text(text.replace(old, new, 1), encoding='utf-8')
+          elif new not in text:
+              raise SystemExit('Neither the expected old renderer nor the new renderer was found')
           PY
-          git rm .github/workflows/temporary-0.2.2-renderer-fix.yml
+
+          if [[ -f .github/workflows/temporary-0.2.2-renderer-fix.yml ]]; then
+            git rm .github/workflows/temporary-0.2.2-renderer-fix.yml
+          fi
           git diff --check
           git diff -- src/content.js .github/workflows/temporary-0.2.2-renderer-fix.yml
 
       - name: Commit and push feature-branch fix
+        shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add src/content.js .github/workflows/temporary-0.2.2-renderer-fix.yml
-          git commit -m "fix: preserve ordered list numbering and indentation"
-          git push origin HEAD:codex/0.2.2-list-fidelity
+          git add -A src/content.js .github/workflows/temporary-0.2.2-renderer-fix.yml
+          if git diff --cached --quiet; then
+            echo "Feature branch already contains the renderer fix."
+          else
+            git commit -m "fix: preserve ordered list numbering and indentation"
+            git push origin HEAD:codex/0.2.2-list-fidelity
+          fi
 
-      - name: Remove this temporary workflow from main
+      - name: Remove temporary automation from main
         if: ${{ always() }}
         shell: bash
         run: |
           git reset --hard
           git fetch origin main
           git switch --force-create main origin/main
-          git rm .github/workflows/temporary-0.2.2-branch-patch.yml
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm -f .github/workflows/temporary-0.2.2-branch-patch.yml
+          if [[ -f automation-trigger-main-push-0.2.2.txt ]]; then
+            git rm -f automation-trigger-main-push-0.2.2.txt
+          fi
           git commit -m "chore: remove temporary 0.2.2 branch patch"
           git push origin HEAD:main
