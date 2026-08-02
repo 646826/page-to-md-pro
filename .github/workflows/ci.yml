@@ -52,6 +52,9 @@ jobs:
       - name: Test Chrome Web Store upload-only behavior
         run: node --test tests/cws-release.test.mjs
 
+      - name: Test published release verifier
+        run: node --test tests/published-release.test.mjs
+
       - name: Test article fixture
         run: timeout 120s node tests/run-fixture-tests.mjs fixture-article.html
 
