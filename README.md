@@ -2,7 +2,7 @@
 
 Page to Markdown Pro is a local-first Chromium extension that exports the active page or highlighted selection as a clean Markdown file.
 
-Version **0.2.2** improves ordered-list fidelity: it preserves zero and negative starts, reversed numbering, item-level counter resets, and marker-aware nested indentation, with browser-level regression coverage and no new host permissions, telemetry, remote code, or runtime dependencies.
+Version **0.2.3** hardens large-download completion tracking: save-dialog time no longer consumes the terminal-state timeout, and stalled Blob downloads fail with a stable error instead of being reported as successful, with no new host permissions, telemetry, remote code, or runtime dependencies.
 
 ## Highlights
 
@@ -15,7 +15,7 @@ Version **0.2.2** improves ordered-list fidelity: it preserves zero and negative
 - Lazy/placeholder-image normalization, image-only selection export, and meaningful video/audio source links.
 - Tracking-parameter removal and active-protocol filtering.
 - Per-tab and per-request capture deduplication, bounded retries, ordered status badges, and timeout errors.
-- Large downloads through an offscreen Blob URL that remains alive until Chrome reports completion or interruption.
+- Large downloads through an offscreen Blob URL that remains alive until Chrome reports completion or interruption, with bounded timeout cleanup for stalled transfers.
 - Local processing only. Page data is not sent to developer-controlled servers.
 
 ## Install locally
@@ -85,7 +85,7 @@ npm run build:zip         # deterministic Chrome Web Store ZIP
 npm run validate:package  # manifest, permissions, files, and ZIP allowlist
 ```
 
-The suite currently includes 36 Node tests and eleven Chromium fixtures covering articles, tables, math, HTML line breaks, ordered-list counters and indentation, nested inline-flow code blocks, Shadow DOM, slots, task lists, JSON-LD, delayed mutations, large DOMs and selections, base-URL resolution, lazy/placeholder images, selection-only media, literal HTML, unsafe protocols, deterministic packaging, and published-release evidence.
+The suite currently includes 38 Node tests and eleven Chromium fixtures covering articles, tables, math, HTML line breaks, ordered-list counters and indentation, nested inline-flow code blocks, Shadow DOM, slots, task lists, JSON-LD, delayed mutations, large DOMs and selections, base-URL resolution, lazy/placeholder images, selection-only media, Blob download completion and timeout boundaries, literal HTML, unsafe protocols, deterministic packaging, and published-release evidence.
 
 ## Release model
 
