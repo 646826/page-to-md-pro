@@ -11,12 +11,12 @@ async function assertFile(relativePath) {
   await assert.doesNotReject(access(path.join(root, relativePath)), `Missing ${relativePath}`);
 }
 
-test('manifest and package describe the 0.2.2 module build', async () => {
+test('manifest and package describe the 0.2.3 module build', async () => {
   const [manifest, pkg] = await Promise.all([readJson('manifest.json'), readJson('package.json')]);
   assert.equal(manifest.manifest_version, 3);
   assert.ok(manifest.description.length <= 132, `manifest description is ${manifest.description.length} characters`);
-  assert.equal(manifest.version, '0.2.2');
-  assert.equal(pkg.version, '0.2.2');
+  assert.equal(manifest.version, '0.2.3');
+  assert.equal(pkg.version, '0.2.3');
   assert.equal(pkg.type, 'module');
   assert.equal(manifest.background.service_worker, 'src/background.js');
   assert.equal(manifest.background.type, 'module');
