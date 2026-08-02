@@ -36,6 +36,22 @@ const fixtures = [
     ]
   },
   {
+    file: 'fixture-lists.html', mode: 'full',
+    options: { includeFrontMatter: false, includeSourceLink: false },
+    checks: [
+      '0. Zero\n1. One',
+      '-2. Negative two\n-1. Negative one',
+      '3. Default three\n7. Reset seven\n6. Then six',
+      '10. Ten first line\n\n    Ten continuation\n    - Nested bullet\n11. Eleven'
+    ],
+    rejects: [
+      '1. Zero',
+      '1. Default three\n2. Reset seven',
+      '10. Ten first line\n\n  Ten continuation',
+      '\n  - Nested bullet'
+    ]
+  },
+  {
     file: 'fixture-tables.html', mode: 'main', options: { includeFrontMatter: false, includeSourceLink: false },
     checks: ['| Name | Value |', '| Alpha | 42 |', '| Metric | Reading |\n| --- | --- |\n| Gamma | 7 |', '![A](https://example.test/a.png)', '[Click here](https://example.test/cta)']
   },
