@@ -12,6 +12,8 @@ All notable changes to Page to Markdown Pro are documented here.
 ### Changed
 
 - Made the published-release test fixture derive its version and tag from `manifest.json`, so future version bumps do not invalidate the verifier test.
+- Made package validation accept any Chrome-compatible numeric version while still requiring manifest, package, and lockfile metadata to match.
+- Limited pull-request release verification to verifier tests; checks against real release assets now run only after publication or through manual dispatch.
 
 ### Fixed
 
