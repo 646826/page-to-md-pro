@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-08-02T03:51:30.940Z",
+  "repository": "646826/page-to-md-pro",
+  "tag": "v0.2.1",
+  "version": "0.2.1",
+  "commit": "daa906179e4536204f121415780725b6be5e81bd",
+  "release": {
+    "name": "Page to Markdown Pro 0.2.1",
+    "url": "https://github.com/646826/page-to-md-pro/releases/tag/v0.2.1",
+    "publishedAt": "2026-08-02T03:48:17Z",
+    "draft": false,
+    "prerelease": false,
+    "targetCommitish": "daa906179e4536204f121415780725b6be5e81bd",
+    "assets": [
+      "page-to-md-pro.zip",
+      "release-evidence.json"
+    ]
+  },
+  "chromeWebStoreUpload": "SUCCEEDED",
+  "publishSubmission": "SKIPPED",
+  "publishType": "UPLOAD_ONLY",
+  "skipReview": false,
+  "evidenceVerifiedAt": "2026-08-02T03:48:12.290Z",
+  "verifiedLogMarkers": [
+    "Upload finished successfully.",
+    "Skipping publish step."
+  ],
+  "zip": {
+    "sha256": "4464ea2d861e568e7fb0ca05f220b0251362dc83babf3619fa8217e539c90236",
+    "bytes": 59548,
+    "entryCount": 18,
+    "entries": [
+      "LICENSE",
+      "THIRD_PARTY_NOTICES.md",
+      "assets/icon128.png",
+      "assets/icon16.png",
+      "assets/icon32.png",
+      "assets/icon48.png",
+      "lib/Readability.js",
+      "licenses/Apache-2.0.txt",
+      "manifest.json",
+      "src/background.js",
+      "src/content.js",
+      "src/offscreen.html",
+      "src/offscreen.js",
+      "src/options.css",
+      "src/options.html",
+      "src/options.js",
+      "src/shared.js",
+      "src/storage.js"
+    ],
+    "manifestVersion": "0.2.1"
+  }
+}
