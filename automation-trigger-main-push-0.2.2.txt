@@ -1,3 +1,0 @@
-Trigger the existing idempotent workflow that patches codex/0.2.2-list-fidelity and then removes all temporary automation from main.
-
-Short registered CI trigger: 2026-08-02-list-fidelity-green-3.
