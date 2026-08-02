@@ -1034,7 +1034,7 @@
     const output = [`${indent}${marker}${lines[0] ? ` ${lines[0]}` : ''}`];
     for (let index = 1; index < lines.length; index += 1) output.push(`${continuationIndent}${lines[index]}`);
     for (const child of nested) {
-      const value = renderList(child, { ...context, listIndent: continuationIndent }).trim();
+      const value = renderList(child, { ...context, listIndent: continuationIndent }).trimEnd();
       if (value) output.push(value);
     }
     return output.join('\n');
