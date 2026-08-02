@@ -38,9 +38,11 @@ jobs:
         run: node --test tests/published-release.test.mjs
 
       - name: Verify published release and Chrome Web Store evidence
+        if: ${{ github.event_name != 'pull_request' }}
         run: node scripts/verify-published-release.mjs
 
       - name: Upload verification report
+        if: ${{ github.event_name != 'pull_request' }}
         uses: actions/upload-artifact@v7
         with:
           name: published-release-verification-${{ github.sha }}
