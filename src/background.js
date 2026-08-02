@@ -183,8 +183,13 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
 
   function createDownloadObserver(timeoutMs) {
     const buffered = new Map();
+    const effectiveTimeoutMs = Math.max(
+      1,
+      Number(timeoutMs) || DEFAULT_RUNTIME_OPTIONS.downloadTimeoutMs
+    );
     let targetId = null;
     let settle = null;
+    let timer = null;
     let closed = false;
 
     const promise = new Promise((resolve, reject) => {
@@ -200,10 +205,6 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
       if (delta.id === targetId) processDelta(delta);
     };
 
-    const timer = setTimeout(() => {
-      if (!closed) settle.resolve({ state: 'timeout' });
-    }, Math.max(1, Number(timeoutMs) || DEFAULT_RUNTIME_OPTIONS.downloadTimeoutMs));
-
     chromeApi.downloads.onChanged.addListener(listener);
 
     function processDelta(delta) {
@@ -218,14 +219,27 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
     return {
       async waitFor(downloadId) {
         targetId = downloadId;
+        if (timer === null) {
+          timer = setTimeout(() => {
+            if (!closed) {
+              settle.reject(codedError(
+                'DOWNLOAD_TIMEOUT',
+                'The Markdown download did not complete before the timeout.'
+              ));
+            }
+          }, effectiveTimeoutMs);
+        }
         const earlier = buffered.get(downloadId);
-        if (earlier) processDelta(earlier);
+        if (earlier) {
+          buffered.delete(downloadId);
+          processDelta(earlier);
+        }
         return promise;
       },
       close() {
         if (closed) return;
         closed = true;
-        clearTimeout(timer);
+        if (timer !== null) clearTimeout(timer);
         chromeApi.downloads.onChanged.removeListener(listener);
       }
     };

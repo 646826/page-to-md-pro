@@ -175,6 +175,55 @@ test('revokes a Blob URL and rejects when the download is interrupted', async ()
   assert.equal(harness.downloadsChanged.size, 0);
 });
 
+test('starts the Blob download timeout only after Chrome returns a download ID', async () => {
+  const harness = createChromeHarness();
+  const downloadStart = deferred();
+  harness.chrome.downloads.download = async () => {
+    harness.calls.downloads += 1;
+    return downloadStart.promise;
+  };
+  const controller = createBackgroundController(harness.chrome, {
+    dataUrlThreshold: 10,
+    downloadTimeoutMs: 100
+  });
+
+  let settled = false;
+  const pending = controller.downloadMarkdown('x'.repeat(100), 'save-dialog.md', true);
+  pending.then(
+    () => { settled = true; },
+    () => { settled = true; }
+  );
+
+  await new Promise((resolve) => setTimeout(resolve, 150));
+  assert.equal(settled, false, 'waiting for Chrome to return a download ID must not consume the terminal-state timeout');
+
+  downloadStart.resolve(7);
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(settled, false, 'a started download must remain pending until a terminal state or post-start timeout');
+
+  harness.downloadsChanged.emit({ id: 7, state: { current: 'complete' } });
+  const result = await pending;
+  assert.equal(result.downloadId, 7);
+});
+
+test('rejects and cleans up when a Blob download never reaches a terminal state', async () => {
+  const harness = createChromeHarness();
+  const controller = createBackgroundController(harness.chrome, {
+    dataUrlThreshold: 10,
+    downloadTimeoutMs: 30
+  });
+
+  const pending = controller.downloadMarkdown('x'.repeat(100), 'stalled.md', false);
+
+  await assert.rejects(
+    pending,
+    (error) => error.code === 'DOWNLOAD_TIMEOUT'
+      && error.message === 'The Markdown download did not complete before the timeout.'
+  );
+  assert.equal(harness.calls.runtimeMessages.filter((message) => message.type === 'page-to-md-revoke-blob').length, 1);
+  assert.equal(harness.downloadsChanged.size, 0);
+});
+
 test('retries one transient extraction messaging failure', async () => {
   const harness = createChromeHarness();
   let attempts = 0;
