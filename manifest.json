@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Page to Markdown Pro",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "minimum_chrome_version": "109",
   "description": "Export pages and selections to clean Markdown, with reliable support for docs, code, tables, math, task lists, and web components.",
   "permissions": [
