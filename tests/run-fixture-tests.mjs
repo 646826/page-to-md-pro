@@ -24,7 +24,7 @@ const fixtures = [
     expectedObserverCount: 2
   },
   {
-    file: 'fixture-rendering-regressions.html', mode: 'main',
+    file: 'fixture-rendering-regressions.html', mode: 'full',
     options: { includeFrontMatter: false, includeSourceLink: false },
     checks: [
       'First line<br>\nSecond line',
