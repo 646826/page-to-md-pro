@@ -25,6 +25,7 @@ jobs:
         run: |
           python - <<'PY'
           from pathlib import Path
+          from textwrap import dedent
 
           def read(path):
               return Path(path).read_text(encoding='utf-8')
@@ -51,34 +52,19 @@ jobs:
           replace_count('package-lock.json', '"version": "0.2.0"', '"version": "0.2.1"', 2)
           replace_count('tests/package.test.mjs', '0.2.0', '0.2.1', 3)
 
-          replace_once(
-              '.github/workflows/ci.yml',
-              """      - name: Test Chrome Web Store upload-only behavior
-                run: node --test tests/cws-release.test.mjs
-
-              - name: Test article fixture
-""",
-              """      - name: Test Chrome Web Store upload-only behavior
-                run: node --test tests/cws-release.test.mjs
-
-              - name: Test published release verifier
-                run: node --test tests/published-release.test.mjs
-
-              - name: Test article fixture
-"""
+          ci_anchor = '      - name: Test article fixture\n'
+          ci_insert = (
+              '      - name: Test published release verifier\n'
+              '        run: node --test tests/published-release.test.mjs\n\n'
           )
+          replace_once('.github/workflows/ci.yml', ci_anchor, ci_insert + ci_anchor)
 
-          replace_once(
-              'tests/package.test.mjs',
-              r"""  assert.match(ci, /actions\/upload-artifact@v7/);
-            assert.match(release, /actions\/upload-artifact@v7/);
-""",
-              r"""  assert.match(ci, /actions\/upload-artifact@v7/);
-            assert.match(ci, /node --test tests\/published-release\.test\.mjs/);
-            assert.match(ci, /fixture-rendering-regressions\.html/);
-            assert.match(release, /actions\/upload-artifact@v7/);
-"""
+          package_anchor = '  assert.match(release, /actions\\/upload-artifact@v7/);\n'
+          package_insert = (
+              '  assert.match(ci, /node --test tests\\/published-release\\.test\\.mjs/);\n'
+              '  assert.match(ci, /fixture-rendering-regressions\\.html/);\n'
           )
+          replace_once('tests/package.test.mjs', package_anchor, package_insert + package_anchor)
 
           replace_once(
               'README.md',
@@ -91,46 +77,45 @@ jobs:
               'The suite currently includes 36 Node tests and ten Chromium fixtures covering articles, tables, math, HTML line breaks, nested inline-flow code blocks, Shadow DOM, slots, task lists, JSON-LD, delayed mutations, large DOMs and selections, base-URL resolution, lazy/placeholder images, selection-only media, literal HTML, unsafe protocols, deterministic packaging, and published-release evidence.'
           )
 
-          changelog_entry = """## [0.2.1] - 2026-08-02
+          changelog_entry = dedent('''
+              ## [0.2.1] - 2026-08-02
 
-          ### Added
+              ### Added
 
-          - Browser regression coverage for HTML line breaks and code blocks nested in inline/custom-element flow.
-          - Dedicated CI execution for the published-release verifier and the new rendering-regression fixture.
+              - Browser regression coverage for HTML line breaks and code blocks nested in inline/custom-element flow.
+              - Dedicated CI execution for the published-release verifier and the new rendering-regression fixture.
 
-          ### Fixed
+              ### Fixed
 
-          - Restored valid `<br>` Markdown output instead of emitting the malformed `<br-` fragment.
-          - Removed a stray `l` character before code blocks encountered in inline flow.
+              - Restored valid `<br>` Markdown output instead of emitting the malformed `<br-` fragment.
+              - Removed a stray `l` character before code blocks encountered in inline flow.
 
-          """
-          replace_once(
-              'CHANGELOG.md',
-              '# Changelog\n\nAll notable changes to Page to Markdown Pro are documented here.\n\n',
-              '# Changelog\n\nAll notable changes to Page to Markdown Pro are documented here.\n\n' + changelog_entry
-          )
+          ''').lstrip()
+          changelog_header = '# Changelog\n\nAll notable changes to Page to Markdown Pro are documented here.\n\n'
+          replace_once('CHANGELOG.md', changelog_header, changelog_header + changelog_entry)
 
-          release_notes = """# Page to Markdown Pro 0.2.1
+          release_notes = dedent('''
+              # Page to Markdown Pro 0.2.1
 
-          Released on 2026-08-02.
+              Released on 2026-08-02.
 
-          ## What changed
+              ## What changed
 
-          - HTML `<br>` elements now render as valid `<br>` Markdown followed by a newline.
-          - Code-block containers reached through inline or custom-element flow no longer receive a stray `l` prefix.
-          - A real Chromium regression fixture exercises both paths and runs as a focused CI step as well as part of the aggregate suite.
-          - The existing published-release verifier now has its own focused CI step for clearer failures.
+              - HTML `<br>` elements now render as valid `<br>` Markdown followed by a newline.
+              - Code-block containers reached through inline or custom-element flow no longer receive a stray `l` prefix.
+              - A real Chromium regression fixture exercises both paths and runs as a focused CI step as well as part of the aggregate suite.
+              - The existing published-release verifier now has its own focused CI step for clearer failures.
 
-          ## Compatibility and security
+              ## Compatibility and security
 
-          - No extension permissions, host permissions, runtime dependencies, telemetry, or remote executable code were added.
-          - The minimum supported Chrome version remains 109.
-          - Automated delivery remains `UPLOAD_ONLY`: the package is uploaded to Chrome Web Store but is not submitted for publication automatically.
+              - No extension permissions, host permissions, runtime dependencies, telemetry, or remote executable code were added.
+              - The minimum supported Chrome version remains 109.
+              - Automated delivery remains `UPLOAD_ONLY`: the package is uploaded to Chrome Web Store but is not submitted for publication automatically.
 
-          ## Verification gates
+              ## Verification gates
 
-          The release candidate must pass all 36 Node tests, all ten Chromium fixtures, `npm test`, deterministic ZIP construction, and exact release-package allowlist validation before merge. The main-branch release workflow repeats the full verification before store upload and GitHub Release creation.
-          """
+              The release candidate must pass all 36 Node tests, all ten Chromium fixtures, `npm test`, deterministic ZIP construction, and exact release-package allowlist validation before merge. The main-branch release workflow repeats the full verification before store upload and GitHub Release creation.
+          ''').lstrip()
           release_path = Path('docs/releases/0.2.1.md')
           if release_path.exists():
               raise SystemExit(f'{release_path} already exists')
