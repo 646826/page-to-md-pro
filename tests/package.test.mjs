@@ -11,12 +11,12 @@ async function assertFile(relativePath) {
   await assert.doesNotReject(access(path.join(root, relativePath)), `Missing ${relativePath}`);
 }
 
-test('manifest and package describe the 0.2.1 module build', async () => {
+test('manifest and package describe the 0.2.2 module build', async () => {
   const [manifest, pkg] = await Promise.all([readJson('manifest.json'), readJson('package.json')]);
   assert.equal(manifest.manifest_version, 3);
   assert.ok(manifest.description.length <= 132, `manifest description is ${manifest.description.length} characters`);
-  assert.equal(manifest.version, '0.2.1');
-  assert.equal(pkg.version, '0.2.1');
+  assert.equal(manifest.version, '0.2.2');
+  assert.equal(pkg.version, '0.2.2');
   assert.equal(pkg.type, 'module');
   assert.equal(manifest.background.service_worker, 'src/background.js');
   assert.equal(manifest.background.type, 'module');
@@ -124,6 +124,7 @@ test('workflows use current Node 24 actions and create releases only after verif
   assert.match(ci, /actions\/upload-artifact@v7/);
   assert.match(ci, /node --test tests\/published-release\.test\.mjs/);
   assert.match(ci, /fixture-rendering-regressions\.html/);
+  assert.match(ci, /fixture-lists\.html/);
   assert.match(release, /actions\/upload-artifact@v7/);
   assert.match(publishedRelease, /name: Verify published release and Chrome Web Store evidence\n\s+if: \$\{\{ github\.event_name != 'pull_request' \}\}/);
   assert.match(publishedRelease, /name: Upload verification report\n\s+if: \$\{\{ github\.event_name != 'pull_request' \}\}/);
