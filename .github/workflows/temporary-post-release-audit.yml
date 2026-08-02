@@ -1,0 +1,65 @@
+name: Temporary post-release audit
+
+on:
+  push:
+    branches:
+      - codex/0.2.1-rendering-regressions
+    paths:
+      - .github/workflows/temporary-post-release-audit.yml
+
+permissions:
+  contents: write
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      GITHUB_REPOSITORY: ${{ github.repository }}
+      RELEASE_TAG: v0.2.1
+    steps:
+      - name: Check out audited branch
+        uses: actions/checkout@v6
+        with:
+          ref: codex/0.2.1-rendering-regressions
+          fetch-depth: 0
+
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Verify published release assets and delivery evidence
+        id: verify
+        shell: bash
+        run: |
+          set +e
+          node scripts/verify-published-release.mjs > audit.stdout 2> audit.stderr
+          code=$?
+          set -e
+          AUDIT_EXIT_CODE="$code" node <<'NODE'
+          const fs = require('node:fs');
+          const status = {
+            schemaVersion: 1,
+            tag: process.env.RELEASE_TAG,
+            commit: process.env.GITHUB_SHA,
+            exitCode: Number(process.env.AUDIT_EXIT_CODE),
+            stdout: fs.readFileSync('audit.stdout', 'utf8'),
+            stderr: fs.readFileSync('audit.stderr', 'utf8'),
+            recordedAt: new Date().toISOString()
+          };
+          fs.writeFileSync('post-release-audit-status.json', `${JSON.stringify(status, null, 2)}\n`);
+          NODE
+
+      - name: Commit audit report to the temporary branch
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add post-release-audit-status.json
+          if [[ -f published-release-verification.json ]]; then
+            git add published-release-verification.json
+          fi
+          git commit -m "chore: record v0.2.1 post-release audit"
+          git push origin HEAD:codex/0.2.1-rendering-regressions
