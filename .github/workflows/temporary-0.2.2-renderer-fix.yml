@@ -1,11 +1,11 @@
 name: Temporary 0.2.2 renderer fix
 
 on:
-  push:
+  pull_request:
     branches:
       - codex/0.2.2-list-fidelity
     paths:
-      - .github/workflows/temporary-0.2.2-renderer-fix.yml
+      - automation-trigger-0.2.2.txt
 
 permissions:
   contents: write
