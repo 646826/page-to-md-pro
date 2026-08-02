@@ -44,7 +44,7 @@
     <article>
       <h1>Rendering Regressions</h1>
       <p>First line<br>Second line</p>
-      <div>Before code <p2m-code class="highlight"><code class="language-js">const nested = true;</code></p2m-code> After code</div>
+      <div><span>Before code <p2m-code class="highlight"><code class="language-js">const nested = true;</code></p2m-code> After code</span></div>
     </article>
   </main>
 </body>
@@ -58,7 +58,7 @@ Add this descriptor to `fixtures` in `tests/run-fixture-tests.mjs`:
 ```js
 {
   file: 'fixture-rendering-regressions.html',
-  mode: 'main',
+  mode: 'full',
   options: { includeFrontMatter: false, includeSourceLink: false },
   checks: [
     'First line<br>\nSecond line',
@@ -154,9 +154,10 @@ Expected: exit code 0 and `✓ fixture-rendering-regressions.html`.
 - Modify: `package.json`
 - Modify: `package-lock.json`
 - Modify: `tests/package.test.mjs`
+- Modify: `.github/workflows/ci.yml`
 - Modify: `CHANGELOG.md`
 - Create: `docs/releases/0.2.1.md`
-- Modify: `README.md` only where it identifies the current release or fixture count.
+- Modify: `README.md` only where it identifies the current release or test counts.
 
 **Interfaces:**
 - Consumes: existing package/release validation and the `main` release workflow.
@@ -166,7 +167,11 @@ Expected: exit code 0 and `✓ fixture-rendering-regressions.html`.
 
 Set `version` to `0.2.1` in `manifest.json`, `package.json`, and both root version fields in `package-lock.json`. Update the package test name and assertions from `0.2.0` to `0.2.1`.
 
-- [ ] **Step 2: Add changelog entry**
+- [ ] **Step 2: Add focused CI coverage for release verification**
+
+Run `tests/published-release.test.mjs` as an explicit CI step and make `tests/package.test.mjs` enforce both focused CI entries.
+
+- [ ] **Step 3: Add changelog entry**
 
 Add above 0.2.0:
 
@@ -175,26 +180,27 @@ Add above 0.2.0:
 
 ### Added
 
-- Browser regression coverage for HTML line breaks and nested inline-flow code blocks.
+- Browser regression coverage for HTML line breaks and code blocks nested in inline/custom-element flow.
+- Dedicated CI execution for the published-release verifier and the new rendering-regression fixture.
 
 ### Fixed
 
 - Restored valid `<br>` Markdown output instead of emitting the malformed `<br-` fragment.
-- Removed a stray `l` character before code blocks encountered in inline/custom-element flow.
+- Removed a stray `l` character before code blocks encountered in inline flow.
 ```
 
-- [ ] **Step 3: Add release notes**
+- [ ] **Step 4: Add release notes**
 
 Create `docs/releases/0.2.1.md` describing the two user-visible fixes, regression coverage, unchanged permissions, and the verification commands.
 
-- [ ] **Step 4: Update README release facts**
+- [ ] **Step 5: Update README release facts**
 
-Change only exact current-version and fixture-count statements made stale by this release; do not rewrite unrelated documentation.
+Change only exact current-version and test-count statements made stale by this release; do not rewrite unrelated documentation.
 
-- [ ] **Step 5: Commit release preparation**
+- [ ] **Step 6: Commit release preparation**
 
 ```bash
-git add manifest.json package.json package-lock.json tests/package.test.mjs CHANGELOG.md docs/releases/0.2.1.md README.md
+git add manifest.json package.json package-lock.json tests/package.test.mjs .github/workflows/ci.yml CHANGELOG.md docs/releases/0.2.1.md README.md
 git commit -m "chore: prepare release 0.2.1"
 ```
 
@@ -221,7 +227,7 @@ npm run build:zip
 npm run validate:package
 ```
 
-Expected: every command exits 0; all Node tests and all 10 browser fixtures pass; the ZIP validates against the exact runtime allowlist.
+Expected: every command exits 0; all 36 Node tests and all 10 browser fixtures pass; the ZIP validates against the exact runtime allowlist.
 
 - [ ] **Step 2: Review the complete diff**
 
