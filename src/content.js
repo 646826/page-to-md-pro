@@ -858,10 +858,10 @@
     if (!(node instanceof Element)) return '';
     if (node.hasAttribute('data-p2m-task')) return '';
     if (node.hasAttribute('data-p2m-math')) return renderMathNode(node);
-    if (isCodeBlockContainer(node)) return `\l\n${renderCodeBlock(node)}\n\n`;
+    if (isCodeBlockContainer(node)) return `\n\n${renderCodeBlock(node)}\n\n`;
 
     switch (node.tagName) {
-      case 'BR': return '<br-\n';
+      case 'BR': return '<br>\n';
       case 'A': return renderLink(node, context);
       case 'IMG': case 'PICTURE': return renderInlineImage(node, context);
       case 'VIDEO': case 'AUDIO': return renderMedia(node, context);
