@@ -2,6 +2,17 @@
 
 All notable changes to Page to Markdown Pro are documented here.
 
+## [0.2.2] - 2026-08-02
+
+### Added
+
+- Browser regression coverage for zero, negative, reversed, reset, multi-digit, multiline, and nested ordered lists.
+
+### Fixed
+
+- Preserved `<ol start="0">`, negative starts, `<ol reversed>`, and direct `<li value>` counter resets.
+- Used marker-width-aware continuation and nested-list indentation so multi-digit ordered lists remain valid Markdown.
+
 ## [0.2.1] - 2026-08-02
 
 ### Added
