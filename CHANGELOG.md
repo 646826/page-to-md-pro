@@ -2,6 +2,18 @@
 
 All notable changes to Page to Markdown Pro are documented here.
 
+## [0.2.1] - 2026-08-02
+
+### Added
+
+- Browser regression coverage for HTML line breaks and code blocks nested in inline/custom-element flow.
+- Dedicated CI execution for the published-release verifier and the new rendering-regression fixture.
+
+### Fixed
+
+- Restored valid `<br>` Markdown output instead of emitting the malformed `<br-` fragment.
+- Removed a stray `l` character before code blocks encountered in inline flow.
+
 ## [0.2.0] - 2026-07-19
 
 ### Added
