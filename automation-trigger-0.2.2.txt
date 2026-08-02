@@ -1,0 +1,1 @@
+Trigger the temporary same-repository workflow that applies the verified 0.2.2 renderer patch to codex/0.2.2-list-fidelity.
