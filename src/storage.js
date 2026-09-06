@@ -1,11 +1,13 @@
 import { DEFAULT_OPTIONS, normalizeOptions } from './shared.js';
 
 const OPTION_KEYS = Object.freeze(Object.keys(DEFAULT_OPTIONS));
+const PENDING_OPTIONS_KEY = 'pageToMdPendingOptions';
+const LOCAL_KEYS = Object.freeze([...OPTION_KEYS, PENDING_OPTIONS_KEY]);
 
 export async function ensureDefaultOptions(storage = globalThis.chrome?.storage) {
   assertStorage(storage);
-  const { syncValues, localValues, syncReadable } = await readBoth(storage);
-  const merged = { ...localValues, ...syncValues };
+  const snapshot = await readBoth(storage);
+  const merged = mergeValues(snapshot);
   const missing = {};
 
   for (const [key, defaultValue] of Object.entries(DEFAULT_OPTIONS)) {
@@ -13,7 +15,7 @@ export async function ensureDefaultOptions(storage = globalThis.chrome?.storage)
   }
 
   if (Object.keys(missing).length > 0) {
-    if (syncReadable) {
+    if (snapshot.syncReadable) {
       try {
         await storage.sync.set(missing);
       } catch {
@@ -29,48 +31,54 @@ export async function ensureDefaultOptions(storage = globalThis.chrome?.storage)
 
 export async function getOptions(storage = globalThis.chrome?.storage) {
   assertStorage(storage);
-  const { syncValues, localValues } = await readBoth(storage);
-  return normalizeOptions({ ...localValues, ...syncValues });
+  return normalizeOptions(mergeValues(await readBoth(storage)));
 }
 
 export async function setOptions(storage = globalThis.chrome?.storage, values = {}) {
   assertStorage(storage);
   const normalized = normalizeOptions(values);
-
+  // Keep legacy flat keys for fallback compatibility. The marker distinguishes
+  // a newly unsynced user choice from old local data that should defer to sync.
+  const pending = { ...normalized, [PENDING_OPTIONS_KEY]: normalized };
   try {
     await storage.sync.set(normalized);
-    if (typeof storage.local.remove === 'function') {
-      await storage.local.remove(OPTION_KEYS).catch(() => {});
-    }
-    return { area: 'sync', options: normalized };
   } catch {
-    await storage.local.set(normalized);
+    await storage.local.set(pending);
     return { area: 'local', options: normalized };
   }
+
+  try {
+    if (typeof storage.local.remove !== 'function') throw new Error('Local cleanup unavailable.');
+    await storage.local.remove(LOCAL_KEYS);
+  } catch {
+    // If cleanup fails, replace the old pending choice rather than allowing it
+    // to override the successful save. Surface a second write failure honestly.
+    await storage.local.set(pending);
+  }
+  return { area: 'sync', options: normalized };
+}
+
+function mergeValues({ localValues, syncValues }) {
+  const pending = objectOrEmpty(localValues[PENDING_OPTIONS_KEY]);
+  return { ...localValues, ...syncValues, ...pending };
 }
 
 async function readBoth(storage) {
-  let syncValues = {};
-  let syncReadable = true;
-  try {
-    syncValues = await storage.sync.get(OPTION_KEYS);
-  } catch {
-    syncReadable = false;
-  }
+  // Independent reads need not add their latencies together.
+  const [sync, local] = await Promise.all([
+    readArea(storage.sync, OPTION_KEYS),
+    readArea(storage.local, LOCAL_KEYS)
+  ]);
+  return { syncValues: sync.values, localValues: local.values, syncReadable: sync.readable };
+}
 
-  let localValues = {};
+async function readArea(area, keys) {
   try {
-    localValues = await storage.local.get(OPTION_KEYS);
+    return { values: objectOrEmpty(await area.get(keys)), readable: true };
   } catch {
-    // Local storage is the last fallback. Returning defaults is safer than
-    // failing every capture because browser storage is temporarily broken.
+    // A failure in one area must not discard the other area's usable settings.
+    return { values: {}, readable: false };
   }
-
-  return {
-    syncValues: objectOrEmpty(syncValues),
-    localValues: objectOrEmpty(localValues),
-    syncReadable
-  };
 }
 
 function assertStorage(storage) {
@@ -80,5 +88,5 @@ function assertStorage(storage) {
 }
 
 function objectOrEmpty(value) {
-  return value && typeof value === 'object' ? value : {};
+  return value && typeof value === 'object' && !Array.isArray(value) ? value : {};
 }

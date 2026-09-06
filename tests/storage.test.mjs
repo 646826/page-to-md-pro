@@ -104,5 +104,5 @@ test('storage reads request the explicit option key list', async () => {
   const storage = createStorage({ sync: { actionMode: 'main' } });
   await getOptions(storage);
   assert.deepEqual(storage.sync.calls.lastGetKeys, Object.keys(DEFAULT_OPTIONS));
-  assert.deepEqual(storage.local.calls.lastGetKeys, Object.keys(DEFAULT_OPTIONS));
+  assert.deepEqual(storage.local.calls.lastGetKeys, [...Object.keys(DEFAULT_OPTIONS), 'pageToMdPendingOptions']);
 });
