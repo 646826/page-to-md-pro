@@ -44,8 +44,8 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
       void captureAndDownload(tab, 'action').catch(() => {});
     });
 
-    chromeApi.commands.onCommand.addListener((command) => {
-      void handleCommand(command).catch(logFailure);
+    chromeApi.commands.onCommand.addListener((command, tab) => {
+      void handleCommand(command, tab).catch(logFailure);
     });
 
     chromeApi.contextMenus.onClicked.addListener((info, tab) => {
