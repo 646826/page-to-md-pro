@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 const workflowPath = new URL('../.github/workflows/chrome-web-store-release.yml', import.meta.url);
 
-const approvedVersion = '0.3.0';
+const approvedVersion = '0.3.1';
 const workflow = readFileSync(workflowPath, 'utf8');
 const block = workflow.split('      - name: Resolve version and release mode\n')[1]?.split('\n      - name:')[0];
 assert.ok(block, 'the actual release resolver must be present');
