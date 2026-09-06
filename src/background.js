@@ -113,7 +113,14 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
     const requestId = randomId();
     for (let attempt = 0; attempt < 2; attempt += 1) {
       try {
-        await injectContent(tabId);
+        // Bound injection separately so a late Chrome response cannot resume
+        // this operation and send a stale extraction request after timeout.
+        await withTimeout(
+          injectContent(tabId),
+          runtimeOptions.captureTimeoutMs,
+          'CAPTURE_TIMEOUT',
+          'The page took too long to initialize the Markdown exporter.'
+        );
         return await withTimeout(
           chromeApi.tabs.sendMessage(tabId, {
             type: 'page-to-md-extract',
