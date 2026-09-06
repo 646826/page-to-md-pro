@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Table caption fidelity</title><base href="https://example.test/reports/"></head>
+<body><main>
+<h1>Table caption fidelity</h1>
+<table><caption>Measurements in <strong>milliseconds</strong> — <a href="method?utm_source=fixture">method</a></caption>
+<thead><tr><th>Name</th><th>Value</th></tr></thead><tbody><tr><td>Alpha</td><td>42</td></tr></tbody></table>
+<table role="presentation"><caption>Layout caption</caption><tr><td>Layout content</td></tr></table>
+<table><caption>Grouped results</caption><tr><th colspan="2">Group</th></tr><tr><td>First</td><td>Second</td></tr></table>
+<table><caption>Results pending</caption></table>
+<table><tr><th>Ordinary</th><th>Data</th></tr><tr><td>Unchanged</td><td>7</td></tr></table>
+<table><caption><a href="javascript:void(0)">Unsafe caption link</a> and literal &lt;img src=x onerror=alert(1)&gt;</caption><tr><th>Safe</th><th>Value</th></tr><tr><td>Still safe</td><td>1</td></tr></table>
+<figure><table><caption>Inner table caption</caption><tr><th>X</th><th>Y</th></tr><tr><td>1</td><td>2</td></tr></table><figcaption>Outer figure caption</figcaption></figure>
+</main></body></html>
