@@ -60,13 +60,14 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
     });
   }
 
-  function captureAndDownload(tab, requestedMode) {
+  function captureAndDownload(tab, requestedMode, frameId = 0) {
     if (!tab?.id) return Promise.reject(codedError('NO_ACTIVE_TAB', 'No active browser tab was found.'));
 
     const existing = activeCaptures.get(tab.id);
     if (existing) return existing;
 
-    const operation = runCapture(tab, requestedMode);
+    const targetFrameId = Number.isInteger(frameId) && frameId >= 0 ? frameId : 0;
+    const operation = runCapture(tab, requestedMode, targetFrameId);
     activeCaptures.set(tab.id, operation);
     const cleanup = () => {
       if (activeCaptures.get(tab.id) === operation) activeCaptures.delete(tab.id);
@@ -75,7 +76,7 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
     return operation;
   }
 
-  async function runCapture(tab, requestedMode) {
+  async function runCapture(tab, requestedMode, frameId) {
     if (!isSupportedTabUrl(tab.url)) {
       await flashBadge(tab.id, 'ERR', '#B42318');
       throw codedError('UNSUPPORTED_URL', `This page cannot be exported: ${tab.url || 'unknown URL'}`);
@@ -86,7 +87,7 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
     try {
       const options = await getOptions(chromeApi.storage);
       const mode = requestedMode === 'action' ? options.actionMode : requestedMode;
-      const response = await extractWithRetry(tab.id, { mode, options });
+      const response = await extractWithRetry(tab.id, { mode, options }, frameId);
 
       if (!response?.ok || !response.result || typeof response.result.markdown !== 'string') {
         const remoteError = response?.error;
@@ -108,7 +109,7 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
     }
   }
 
-  async function extractWithRetry(tabId, payload) {
+  async function extractWithRetry(tabId, payload, frameId) {
     let lastError;
     const requestId = randomId();
     for (let attempt = 0; attempt < 2; attempt += 1) {
@@ -116,7 +117,7 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
         // Bound injection separately so a late Chrome response cannot resume
         // this operation and send a stale extraction request after timeout.
         await withTimeout(
-          injectContent(tabId),
+          injectContent(tabId, frameId),
           runtimeOptions.captureTimeoutMs,
           'CAPTURE_TIMEOUT',
           'The page took too long to initialize the Markdown exporter.'
@@ -126,7 +127,7 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
             type: 'page-to-md-extract',
             requestId,
             payload
-          }),
+          }, { frameId }),
           runtimeOptions.captureTimeoutMs,
           'CAPTURE_TIMEOUT',
           'The page took too long to produce Markdown.'
@@ -140,9 +141,9 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
     throw lastError || codedError('EXTRACTION_FAILED', 'Could not extract this page.');
   }
 
-  async function injectContent(tabId) {
+  async function injectContent(tabId, frameId) {
     await chromeApi.scripting.executeScript({
-      target: { tabId, allFrames: false },
+      target: { tabId, frameIds: [frameId] },
       files: ['lib/Readability.js', 'src/content.js']
     });
   }
@@ -374,7 +375,9 @@ export function createBackgroundController(chromeApi, runtimeOverrides = {}) {
         : info.menuItemId === MENU_IDS.auto
           ? 'auto'
           : null;
-    if (mode) await captureAndDownload(tab, mode);
+    // Selection belongs to the clicked frame, not necessarily the main page.
+    // Other menu actions retain their existing top-frame scope.
+    if (mode) await captureAndDownload(tab, mode, mode === 'selection' ? info.frameId : 0);
   }
 
   async function flashBadge(tabId, text, color) {
