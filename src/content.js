@@ -941,11 +941,14 @@
   }
 
   function renderInlineCode(value) {
-    const clean = String(value || '').replace(/\r\n?/g, ' ').replace(/\s+/g, ' ').trim();
+    // CommonMark normalizes line endings, not interior spaces or tabs. Add
+    // padding only when the parser would strip real boundary spaces or when
+    // backticks must be separated from the surrounding delimiter.
+    const clean = String(value || '').replace(/\r\n?|\n/g, ' ');
     if (!clean) return '';
-    const maxRun = Math.max(0, ...(clean.match(/`+/g) || []).map((part) => part.length));
-    const fence = '`'.repeat(Math.max(1, maxRun + 1));
-    const pad = clean.startsWith('`') || clean.endsWith('`');
+    const fence = chooseCodeFence(clean, 1);
+    const pad = clean.startsWith('`') || clean.endsWith('`')
+      || (clean.startsWith(' ') && clean.endsWith(' ') && !/^ +$/.test(clean));
     return `${fence}${pad ? ' ' : ''}${clean}${pad ? ' ' : ''}${fence}`;
   }
 
@@ -985,9 +988,11 @@
     return aliases[language] || language;
   }
 
-  function chooseCodeFence(code) {
-    const maxRun = Math.max(0, ...(code.match(/`+/g) || []).map((part) => part.length));
-    return '`'.repeat(Math.max(3, maxRun + 1));
+  function chooseCodeFence(code, minimum = 3) {
+    let maxRun = 0;
+    // Avoid a large temporary array and Math.max(...runs)' argument limit.
+    for (const match of code.matchAll(/`+/g)) maxRun = Math.max(maxRun, match[0].length);
+    return '`'.repeat(Math.max(minimum, maxRun + 1));
   }
 
   function renderList(list, context) {
