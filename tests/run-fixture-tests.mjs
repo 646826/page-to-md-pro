@@ -15,6 +15,20 @@ const defaultOptions = {
   tableMode: 'smart'
 };
 const fixtures = [
+  ...['smart', 'markdown', 'html'].map((tableMode) => ({
+    file: 'fixture-table-captions.html', mode: 'full',
+    options: { tableMode, includeFrontMatter: false, includeSourceLink: false },
+    checks: [
+      'Measurements in', 'https://example.test/reports/method',
+      'Layout content', 'Unchanged', 'Alpha', '42',
+      'Unsafe caption link', '&lt;img src=x onerror=alert(1)&gt;'
+    ],
+    counts: {
+      milliseconds: 1, 'Layout caption': 1, 'Results pending': 1,
+      'Grouped results': 1, 'Inner table caption': 1, 'Outer figure caption': 1
+    },
+    rejects: ['javascript:', '<img src=x', 'utm_source=']
+  })),
   {
     file: 'fixture-article.html', mode: 'auto',
     checks: ['# Fixture Article', '[internal link](https://example.test/docs/link)', '> [!NOTE]', '```javascript', '![Example image](https://example.test/images/example.png)', '- First item'],
