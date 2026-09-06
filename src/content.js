@@ -1123,6 +1123,10 @@
   function renderTable(table, context) {
     if (isCodeBlockContainer(table)) return renderCodeBlock(table);
     if (context.options.tableMode === 'html') return sanitizeHtml(table, context.baseUrl);
+    const caption = table.caption
+      ? renderInlineNodes(Array.from(table.caption.childNodes), context).trim()
+      : '';
+    const withCaption = (body) => [caption, body].filter(Boolean).join('\n\n');
     if (isLikelyLayoutTable(table)) {
       const cells = [];
       for (const row of table.rows) {
@@ -1131,7 +1135,7 @@
           if (text) cells.push(text);
         }
       }
-      return cells.join('\n\n');
+      return withCaption(cells.join('\n\n'));
     }
     if (isComplexTable(table) && context.options.tableMode !== 'markdown') return sanitizeHtml(table, context.baseUrl);
 
@@ -1139,7 +1143,7 @@
       element,
       values: Array.from(element.cells).map((cell) => renderTableCell(cell, context))
     })).filter(({ values }) => values.some(Boolean));
-    if (!extractedRows.length) return '';
+    if (!extractedRows.length) return caption;
     const width = Math.max(...extractedRows.map(({ values }) => values.length));
     const normalized = extractedRows.map(({ values }) => [
       ...values,
@@ -1148,11 +1152,11 @@
     const headerIndex = findHeaderRowIndex(extractedRows.map(({ element }) => element));
     const header = normalized[headerIndex] || normalized[0];
     const body = normalized.filter((_, index) => index !== headerIndex);
-    return [
+    return withCaption([
       `| ${header.map(escapeTableCell).join(' | ')} |`,
       `| ${header.map(() => '---').join(' | ')} |`,
       ...body.map((row) => `| ${row.map(escapeTableCell).join(' | ')} |`)
-    ].join('\n');
+    ].join('\n'));
   }
 
   function isLikelyLayoutTable(table) {
